@@ -50,7 +50,7 @@ label{
     margin-bottom: 4px;
 }
 
-input[type = "email"], input[type = "password"]{
+input[type = "text"], input[type = "password"]{
     display: block;
     width: 85%;
     padding: 10px 15px;
@@ -60,7 +60,7 @@ input[type = "email"], input[type = "password"]{
     transition: border-color 0.15s ease, box-shadow 0.15s ease;
 }
 
-input[type = "email"]:focus, input[type = "password"]:focus{
+input[type = "text"]:focus, input[type = "password"]:focus{
     border-color: hsl(170, 100%, 15%);
     box-shadow: 0 0 0 3px hsla(170, 100%, 15%, 0.25);
 }
