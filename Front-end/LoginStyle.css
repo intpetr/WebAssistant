@@ -1,0 +1,126 @@
+/* Importing a modern font (Inter) */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
+
+/* Global Styles */
+body{
+    font-family: 'Inter', sans-serif;
+    background-color: hsl(170, 100%, 15%);
+    min-height: 100vh;
+    margin: 0;
+
+    /* Centering the card vertically and horizontally */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+}
+
+/* Authentication card container */
+#auth-card{
+    background-color: #fff;
+    color: hsl(215, 28%, 17%);
+    width: 100%;
+    max-width: 448px;
+    height: auto;
+    padding: 40px;
+    border-radius: 15px;
+    box-shadow: 0 10px 30px hsla(0, 0%, 0%, 0.5);
+    transition: all 0.3s ease;
+}
+
+/* Title */
+#form-title{
+    font-size: 2rem;
+    font-weight: 700;
+    color: hsl(215, 28%, 17%);
+    text-align: center;
+    margin-bottom: 15px;
+}
+
+/* Inputs */
+form > div{
+    margin-bottom: 1.5rem;
+}
+
+label{
+    display: block;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: hsl(217, 19%, 27%);
+    margin-bottom: 4px;
+}
+
+input[type = "email"], input[type = "password"]{
+    display: block;
+    width: 85%;
+    padding: 10px 15px;
+    border: 1px solid hsl(216, 12%, 84%);
+    border-radius: 10px;
+    outline: none;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+input[type = "email"]:focus, input[type = "password"]:focus{
+    border-color: hsl(170, 100%, 15%);
+    box-shadow: 0 0 0 3px hsla(170, 100%, 15%, 0.25);
+}
+
+/* Buttons */
+#login-button, #register-button{
+    width: 92%;
+    padding: 10px 15px;
+    font-size: 1rem;
+    font-weight: bold;
+    background-color: hsl(170, 100%, 15%);
+    color: hsl(0, 0%, 100%);
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: background-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+#login-button:hover, #register-button:hover{
+    background-color: hsl(170, 100%, 25%);
+}
+
+#toggle-auth-btn{
+    display: block;
+    width: 92%;
+    background: none;
+    border: none;
+    color: hsl(243, 75%, 59%);
+    font-weight: bold;
+    font-size: 0.875rem;
+    cursor: pointer;
+    margin-top: 25px;
+    padding: 0;
+}
+
+#toggle-auth-btn:hover {
+    color: hsl(244, 55%, 41%); 
+}
+
+/* Initial state overrides */
+#register-form{
+    display: none;
+}
+
+#message-box{
+    display: none;
+    padding: 15px;
+    border-radius: 10px;
+    margin-bottom: 25px;
+    font-size: 0.875rem;
+    font-weight: bold;
+}
+
+/* Error message will be added in JS */
+.message-error{
+    background-color: hsl(0, 93%, 94%);
+    color: hsl(0, 74%, 42%);
+}
+
+.message-success{
+    background-color: hsl(149, 80%, 90%);
+    color: hsl(163, 88%, 20%);
+}

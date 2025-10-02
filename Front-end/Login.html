@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login Screen</title>
+    <link rel="stylesheet" href="LoginStyle.css">
+</head>
+<body>
+    <!-- Auth Card Container-->
+     <div id="auth-card">
+        <h1 id="form-title">Login</h1>
+
+        <!-- Status / Error Message Box-->
+         <div id="message-box" role="alert">
+            <p id="message-text"></p>
+         </div>
+
+         <!-- Login Form -->
+         <form id="login-form">
+            <div>
+                <label for="login-email">Email Adress</label>
+                <input type="email" id="login-email" name="email" placeholder="youremail@example.com">
+            </div>
+            <div>
+                <label for="login-password">Password</label>
+                <input type="password" id="login-password" name="password" placeholder="Your password">
+            </div>
+            <button type="submit" id="login-button">Log In</button>
+         </form>
+
+         <!-- Registration Form -->
+          <form id="register-form">
+            <div>
+                <label for="register-email">Email Adress</label>
+                <input type="email" id="register-email" name="email"
+                placeholder="youremail@example.com">
+            </div>
+            <div>
+                <label for="register-password">Your Password</label>
+                <input type="password" id="register-password" name="password" placeholder="Your password">
+            </div>
+            <div>
+                <label for="confirm-register-password">Please confirm your password</label>
+                <input type="password" id="confirm-register-password" name="password" placeholder="Please re-enter your password">
+            </div>
+            <button type="submit" id="register-button">Register</button>
+          </form>
+
+          <!-- Toggle Button for Registration-->
+           <div>
+            <button id="toggle-auth-btn">
+                Don't have an account yet? Register here.
+            </button>
+           </div>
+     </div>
+
+     <script src="Login.js"></script>
+</body>
+</html>
