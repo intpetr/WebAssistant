@@ -5,6 +5,7 @@
 body{
     font-family: 'Inter', sans-serif;
     background-color: hsl(170, 100%, 15%);
+    color: hsl(177, 41%, 91%);
     min-height: 100vh;
     margin: 0;
 
@@ -13,18 +14,20 @@ body{
     align-items: center;
     justify-content: center;
     padding: 20px;
+    box-sizing: border-box;
 }
 
 /* Authentication card container */
 #auth-card{
     background-color: #fff;
-    color: hsl(215, 28%, 17%);
-    width: 100%;
-    max-width: 448px;
-    height: auto;
-    padding: 40px;
+    color: hsl(0, 0%, 20%);
+    padding: 3rem 2rem;
     border-radius: 15px;
-    box-shadow: 0 10px 30px hsla(0, 0%, 0%, 0.5);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+    width: 100%;
+    max-width: 400px;
+    height: auto;
+    text-align: center;
     transition: all 0.3s ease;
 }
 
@@ -32,9 +35,9 @@ body{
 #form-title{
     font-size: 2rem;
     font-weight: 700;
-    color: hsl(215, 28%, 17%);
+    color: hsl(173, 100%, 24%);
     text-align: center;
-    margin-bottom: 15px;
+    margin-bottom: 2rem;
 }
 
 /* Inputs */
@@ -47,36 +50,42 @@ label{
     font-size: 0.875rem;
     font-weight: 600;
     color: hsl(217, 19%, 27%);
-    margin-bottom: 4px;
+    margin-bottom: 0.5rem;
 }
 
 input[type = "text"], input[type = "password"]{
+    width: 100%;
     display: block;
-    width: 85%;
-    padding: 10px 15px;
-    border: 1px solid hsl(216, 12%, 84%);
+    padding: 0.75rem 1rem;
+    border: 2px solid #ddd;
     border-radius: 10px;
+    box-sizing: border-box;
+    font-size: 1rem;
     outline: none;
     transition: border-color 0.15s ease, box-shadow 0.15s ease;
 }
 
 input[type = "text"]:focus, input[type = "password"]:focus{
-    border-color: hsl(170, 100%, 15%);
-    box-shadow: 0 0 0 3px hsla(170, 100%, 15%, 0.25);
+    border-color: hsl(173, 100%, 24%);
+    box-shadow: 0 0 0 3px rgba(0, 121, 107, 0.2);
 }
 
 /* Buttons */
 #login-button, #register-button{
-    width: 92%;
-    padding: 10px 15px;
-    font-size: 1rem;
-    font-weight: bold;
-    background-color: hsl(170, 100%, 15%);
-    color: hsl(0, 0%, 100%);
+    width: 100%;
+    padding: 0.75rem;
     border: none;
     border-radius: 10px;
+    font-size: 1rem;
+    font-weight: bold;
+    height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: hsl(170, 100%, 15%);
+    color: hsl(0, 0%, 100%);
     cursor: pointer;
-    transition: background-color 0.2s ease, box-shadow 0.2s ease;
+    transition: background-color 0.3s ease, box-shadow 0.2s ease;
 }
 
 #login-button:hover, #register-button:hover{
@@ -123,4 +132,20 @@ input[type = "text"]:focus, input[type = "password"]:focus{
 .message-success{
     background-color: hsl(149, 80%, 90%);
     color: hsl(163, 88%, 20%);
+}
+
+/* Loading Spinner for Buttons (Used by JS) */
+.loading-spinner {
+    border: 4px solid rgba(255, 255, 255, 0.3);
+    border-top: 4px solid white;
+    border-radius: 50%;
+    width: 20px;
+    height: 20px;
+    animation: spin 1s linear infinite;
+    margin-right: 10px;
+}
+
+@keyframes spin{
+    0% {transform: rotate(0deg);}
+    100% {transform: rotate(360deg);}
 }
