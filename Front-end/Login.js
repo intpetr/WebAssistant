@@ -30,7 +30,7 @@ function showMessage(message, type = 'error'){
 
     messageText.textContent = message;
 
-    // Auto-hidin the message after 5 seconds
+    // Auto-hide the message after 5 seconds
     setTimeout(() => {
         messageBox.style.display = 'none';
         messageText.textContent = '';
@@ -73,7 +73,7 @@ function toggleAuthMode(){
 }
 
 // Backend communication with fetch
-async function sendAuthRequest(endpoint, data, button, originalText) {
+async function sendAuthRequest(endpoint, data, button) {
     const url = `${API_BASE_URL}${endpoint}`;
 
     setButtonLoadingState(button, true);
@@ -134,7 +134,7 @@ loginForm.addEventListener('submit', function(e){
     }
 
     const data = {username, password};
-    sendAuthRequest('/login', data, logInButton, 'Log In');
+    sendAuthRequest('/login', data, logInButton);
 });
 
 registerForm.addEventListener('submit', function(e) {
@@ -153,7 +153,7 @@ registerForm.addEventListener('submit', function(e) {
     }
 
     const data = {username, password};
-    sendAuthRequest('/register', data, registerButton, 'Sign Up');
+    sendAuthRequest('/register', data, registerButton);
 })
 
 // Event listeners
