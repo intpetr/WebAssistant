@@ -3,15 +3,18 @@ from flask_cors import CORS
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
 from flask_sqlalchemy import SQLAlchemy
 
+from flask_login import current_user, login_required
+
 from Models import User, db
+#import UserSettings
 
 app = Flask(__name__)
 app.secret_key = "supersecretkey"
 
 CORS(app)
-#import logging
-#log = logging.getLogger('werkzeug')
-#log.setLevel(logging.ERROR)
+# import logging
+# log = logging.getLogger('werkzeug')
+# log.setLevel(logging.ERROR)
 
 
 login_manager = LoginManager()
@@ -23,7 +26,6 @@ def load_user(user_id):
     return User.query.get(int(user_id))
 
 
-# --- Register ---
 @app.route('/register', methods=['POST'])
 def register():
     data = request.get_json()
@@ -40,15 +42,13 @@ def register():
     db.session.add(new_user)
     db.session.commit()
 
-    print('Successfully registered user:',username, 'with password:', password)
+    print('Successfully registered user:', username, 'with password:', password)
 
     return jsonify({"message": f"User {username} registered successfully"}), 201
 
 
-
 @app.route('/login', methods=['POST'])
 def login():
-
     data = request.get_json()
     print(data)
     username = data.get('username')
@@ -60,13 +60,58 @@ def login():
 
     login_user(user)
     print('User successfully logged in :', username)
-    return jsonify({"message": "Login successful", "user": username}), 200
+    if hasattr(user, 'settings') and user.settings:
+        user_settings = user.settings.settings
+    else:
+        user_settings = None
 
+    return jsonify({
+        "message": "Login successful",
+        "user": username,
+        "settings": user_settings
+    }), 200
+
+
+@app.route('/settings', methods=['GET', 'POST'])
+@login_required
+def settings():
+    user = current_user
+
+    if request.method == 'GET':
+        if hasattr(user, 'settings') and user.settings:
+            user_settings = user.settings.settings
+        else:
+            user_settings = None
+
+        return jsonify({
+            "username": user.username,
+            "settings": user_settings
+        })
+
+    elif request.method == 'POST':
+        data = request.get_json()
+        new_settings = data.get('settings')
+
+        if new_settings is None:
+            return jsonify({"error": "No settings provided"}), 400
+
+
+        if hasattr(user, 'settings') and user.settings:
+            user.settings.settings = new_settings
+        else:
+            from Models import UserSettings
+            user_settings = UserSettings(user_id=user.id, settings=new_settings)
+            db.session.add(user_settings)
+
+        db.session.commit()
+
+        return jsonify({
+            "message": "Settings updated successfully"
+        })
 
 @app.route('/dashboard', methods=['GET'])
 @login_required
 def dashboard():
-
     print('Dashboard returned to user')
     return jsonify({"message": f"Hello {current_user.username}, welcome to your dashboard!"})
 
