@@ -6,6 +6,11 @@ body{
     color: hsl(170, 100%, 15%);
 }
 
+header{
+    width: 100%;
+    border-bottom: 5px solid hsla(0, 0%, 0%, 0.5);
+}
+
 .login-button {
     text-decoration: none;
     border: 5px solid hsl(177, 41%, 91%);
