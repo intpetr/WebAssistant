@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Settings</title>
+    <link rel="stylesheet" href="Settings.css">
+</head>
+<body>
+    <!-- Settings card container -->
+     <div id="settings-card">
+        <h1 id="form-title">Visibility Settings</h1>
+        <p class="subtitle">Please select what you want to display on your Home page.</p>
+
+        <!-- Settings form -->
+         <form id="settings-form">
+            <div class="api-list">
+                
+                <!-- Weather Forecast -->
+                 <div class="api-item">
+                    <label for="api-weather">Weather Forecast</label>
+                    <input type="checkbox" id="api-weather" name="api_preference" value="weather">
+                 </div>
+
+                 <!-- Currency Exchange -->
+                  <div class="api-item">
+                    <label for="api-currency">Currency Exchange</label>
+                    <input type="checkbox" id="api-currency" name="api_preference" value="currency">
+                  </div>
+
+                  <!-- Stock Exchange -->
+                   <div class="api-item">
+                    <label for="api-stock">Stock Exchange</label>
+                    <input type="checkbox" id="api-stock" name="api_preference" value="stock">
+                   </div>
+
+                   <!-- News -->
+                    <div class="api-item">
+                        <label for="api-news">News</label>
+                        <input type="checkbox" id="api-news" name="api_preference" value="news">
+                    </div>
+
+                    <!-- Daily Meme -->
+                     <div class="api-item">
+                        <label for="api-meme">Daily Memes</label>
+                        <input type="checkbox" id="api-meme" name="api_preference" value="meme">
+                     </div>
+
+                     <!-- Daily Prayer -->
+                      <div class="api-item">
+                        <label for="api-prayer">Daily Prayer</label>
+                        <input type="checkbox" id="api-prayer" name="api_preference" value="prayer">
+                      </div>
+
+                      <!-- Flight Tickets -->
+                       <div class="api-item">
+                        <label for="api-flight">Flight Tickets</label>
+                        <input type="checkbox"  id="api-flight" name="api_preference" value="flight">
+                       </div>
+
+                       <!-- Moon Phases -->
+                        <div class="api-tem">
+                            <label for="api-moon">Moon Phases</label>
+                            <input type="checkbox" id="api-moon" name="api_preference" value="moon">
+                        </div>
+            </div>
+
+            <!-- Save Button -->
+             <button type="submit" id="save-button">Save Preferences</button>
+         </form>
+     </div>
+
+    <script src="Settings.js"></script>
+</body>
+</html>
