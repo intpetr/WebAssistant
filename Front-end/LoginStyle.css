@@ -1,11 +1,23 @@
 /* Importing a modern font (Inter) */
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
 
+/* Declaring colors as constants because of frequent use of them */
+:root{
+    --dark-green : hsl(170, 100%, 15%);
+    --light-green : hsl(170, 100%, 25%);
+    --purple : hsl(243, 75%, 60%);
+    --dark-purple : hsl(243, 75%, 40%);
+    --red : hsl(0, 74%, 42%);
+    --grey : hsl(217, 19%, 27%);
+    --white : hsl(177, 41%, 91%);
+    --black : hsl(0, 0%, 20%);
+}
+
 /* Global Styles */
 body{
     font-family: 'Inter', sans-serif;
-    background-color: hsl(170, 100%, 15%);
-    color: hsl(177, 41%, 91%);
+    background-color: var(--dark-green);
+    color: var(--white);
     min-height: 100vh;
     margin: 0;
 
@@ -19,8 +31,8 @@ body{
 
 /* Authentication card container */
 #auth-card{
-    background-color: #fff;
-    color: hsl(0, 0%, 20%);
+    background-color: var(--white);
+    color: var(--black);
     padding: 3rem 2rem;
     border-radius: 15px;
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
@@ -35,7 +47,7 @@ body{
 #form-title{
     font-size: 2rem;
     font-weight: 700;
-    color: hsl(173, 100%, 24%);
+    color: var(--light-green);
     text-align: center;
     margin-bottom: 2rem;
 }
@@ -49,7 +61,7 @@ label{
     display: block;
     font-size: 0.875rem;
     font-weight: 600;
-    color: hsl(217, 19%, 27%);
+    color: var(--grey);
     margin-bottom: 0.5rem;
 }
 
@@ -57,7 +69,7 @@ input[type = "text"], input[type = "password"]{
     width: 100%;
     display: block;
     padding: 0.75rem 1rem;
-    border: 2px solid #ddd;
+    border: 2px solid var(--white);
     border-radius: 10px;
     box-sizing: border-box;
     font-size: 1rem;
@@ -66,8 +78,8 @@ input[type = "text"], input[type = "password"]{
 }
 
 input[type = "text"]:focus, input[type = "password"]:focus{
-    border-color: hsl(173, 100%, 24%);
-    box-shadow: 0 0 0 3px rgba(0, 121, 107, 0.2);
+    border-color: var(--light-green);
+    box-shadow: 0 0 0 3px var(--dark-green);
 }
 
 /* Buttons */
@@ -82,14 +94,14 @@ input[type = "text"]:focus, input[type = "password"]:focus{
     display: flex;
     align-items: center;
     justify-content: center;
-    background-color: hsl(170, 100%, 15%);
-    color: hsl(0, 0%, 100%);
+    background-color: var(--dark-green);
+    color: var(--white);
     cursor: pointer;
     transition: background-color 0.3s ease, box-shadow 0.2s ease;
 }
 
 #login-button:hover, #register-button:hover{
-    background-color: hsl(170, 100%, 25%);
+    background-color: var(--light-green);
 }
 
 #toggle-auth-btn{
@@ -97,7 +109,7 @@ input[type = "text"]:focus, input[type = "password"]:focus{
     width: 92%;
     background: none;
     border: none;
-    color: hsl(243, 75%, 59%);
+    color: var(--purple);
     font-weight: bold;
     font-size: 0.875rem;
     cursor: pointer;
@@ -106,7 +118,7 @@ input[type = "text"]:focus, input[type = "password"]:focus{
 }
 
 #toggle-auth-btn:hover {
-    color: hsl(244, 55%, 41%); 
+    color: var(--dark-purple); 
 }
 
 /* Initial state overrides */
@@ -125,13 +137,13 @@ input[type = "text"]:focus, input[type = "password"]:focus{
 
 /* Error message will be added in JS */
 .message-error{
-    background-color: hsl(0, 93%, 94%);
-    color: hsl(0, 74%, 42%);
+    background-color: var(--white);
+    color: var(--red);
 }
 
 .message-success{
-    background-color: hsl(149, 80%, 90%);
-    color: hsl(163, 88%, 20%);
+    background-color: var(--white);
+    color: var(--light-green);
 }
 
 /* Loading Spinner for Buttons (Used by JS) */

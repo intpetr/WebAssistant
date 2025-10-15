@@ -1,11 +1,18 @@
 /* Importing font used in other pages */
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
 
+/* Declaring colors as constants because of frequent use of them */
+:root{
+    --dark-green : hsl(170, 100%, 15%);
+    --light-green : hsl(170, 100%, 25%);
+    --white : hsl(177, 41%, 91%);
+    --black : hsl(0, 0%, 20%);
+}
+
 /* Global Style */
 body{
     font-family: 'Inter', sans-serif;
-    background-color: hsl(170, 100%, 15%);
-    color: hsl(177, 41%, 91%);
+    background-color: var(--dark-green);
     min-height: 100vh;
     margin: 0;
 
@@ -19,8 +26,7 @@ body{
 
 /* Card container */
 #settings-card{
-    background-color: #fff;
-    color: hsl(0, 0%, 20%);
+    background-color: var(--white);
     padding: 3rem 3rem;
     border-radius: 15px;
     box-shadow: 0 10px 30px rgba(0, 0, 0, 25);
@@ -33,7 +39,7 @@ body{
 
 /* Title */
 #form-title{
-    color: hsl(173, 100%, 25%);
+    color: var(--light-green);
     font-size: 2rem;
     font-weight: bolder;
     text-align: center;
@@ -54,13 +60,13 @@ form > div{
 }
 
 .api-item > label{
-    color: hsl(170, 100%, 15%);
+    color: var(--dark-green);
     font-size: 1.5rem;
     font-weight: bold;
 }
 
 .api-item input[type = "checkbox"]{
-    accent-color: hsl(173, 100%, 25%);
+    accent-color: var(--light-green);
     cursor: pointer;
 }
 
@@ -82,8 +88,8 @@ form > div{
     display: flex;
     align-items: center;
     justify-content: center;
-    background-color: hsl(170, 100%, 15%);
-    color: hsl(177, 41%, 91%);
+    background-color: var(--dark-green);
+    color: var(--white);
     cursor: pointer;
     transition: background-color 0.3 ease, box-shadow 0.2s ease;
 }
