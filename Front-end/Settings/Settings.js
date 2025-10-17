@@ -98,6 +98,59 @@ async function loadInitialPreferences() {
     }
 }
 
-/* Handling form submission. 
-    Collecting checked APIs, formating JSON, and sending to backend
-*/
+/* Handling form submission. Collecting checked APIs, formating JSON, and sending to backend */
+async function handleSavePreferences(e) {
+    e.preventDefault();
+
+    const originalText = saveButton.textContent;
+
+    // Collecting checked APIs
+    const enabledApis = [];
+    const checkboxes = settingsForm.querySelectorAll('input[name="api_preference"]:checked');
+
+    checkboxes.forEach(checkbox => {
+        enabledApis.push(checkbox.value);
+    })
+
+    // Formating the JSON payload
+    const payload = {
+        settings : {enabledApis : enabledApis}
+    };
+
+    console.log("JSON payload to be sent: ", payload);
+
+    setButtonState(saveButton, true, originalText);
+
+    // Sending to backend
+    try{
+        const response = await fetch(SAVE_ENDPOINT, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(payload),
+        });
+
+        if(response.ok){
+            showMessage('Preferences saved succesfully', 'success');
+        }
+        else{
+            const errorText = response.statusText || 'Unknown Error';
+            showMessage(`Failed to save preferences. Server response: ${response.status} - ${errorText}`, 'error');
+        }
+    }
+    catch(error){
+        console.error('Network error during API save:', 'error');
+        showMessage('Could not connect to the API server. Check your network or backend URL.');
+    }
+    finally{
+        setButtonState(saveButton, false, originalText);
+    }
+}
+
+// --- Initialization ---
+document.addEventListener('DOMContentLoaded', () => {
+    loadInitialPreferences();
+
+    settingsForm.addEventListener('submit', handleSavePreferences);
+})
