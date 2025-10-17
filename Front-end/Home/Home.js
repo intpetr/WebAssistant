@@ -1,3 +1,3 @@
 function windowChange(){
-    window.location.href = 'Settings.html'
+    window.location.href = '/Settings/Settings.html'
 }
