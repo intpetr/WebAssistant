@@ -92,7 +92,7 @@ async function sendAuthRequest(endpoint, data, button) {
                 showMessage(result.message || `Success ${endpoint === '/login' ? 'Logged in' : 'Account Created'}, 'success`);
 
                 // Redirect after successful login / registration
-                // window.location.href = 'home.html';
+                window.location.href = '/Home/Home.html';
 
                 setButtonLoadingState(button, false, originalText);
                 return; // Exiting successfully
@@ -141,6 +141,7 @@ registerForm.addEventListener('submit', function(e) {
     e.preventDefault();
 
     const username = document.getElementById('register-username').value;
+    const email = document.getElementById('register-email').value;
     const password = document.getElementById('register-password').value;
     const confirmPassword = document.getElementById('confirm-register-password').value;
 
@@ -152,7 +153,7 @@ registerForm.addEventListener('submit', function(e) {
         return showMessage('Passwords do not match.');
     }
 
-    const data = {username, password};
+    const data = {username, email, password};
     sendAuthRequest('/register', data, registerButton);
 })
 
