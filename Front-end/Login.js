@@ -92,7 +92,7 @@ async function sendAuthRequest(endpoint, data, button) {
                 showMessage(result.message || `Success ${endpoint === '/login' ? 'Logged in' : 'Account Created'}, 'success`);
 
                 // Redirect after successful login / registration
-                // window.location.href = 'home.html';
+                window.location.href = 'home.html';
 
                 setButtonLoadingState(button, false, originalText);
                 return; // Exiting successfully

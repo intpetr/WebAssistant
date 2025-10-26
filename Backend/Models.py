@@ -10,10 +10,12 @@ class User(db.Model, UserMixin):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(30), unique=True, nullable=False)
     password = db.Column(db.String(30), nullable=False)
+    email = db.Column(db.String(50))  # ← new column added here
 
     @staticmethod
     def get_by_username(username):
         return User.query.filter_by(username=username).first()
+
 
 
 class UserSettings(db.Model):

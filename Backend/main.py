@@ -31,6 +31,7 @@ def register():
     data = request.get_json()
     username = data.get('username')
     password = data.get('password')
+    email = data.get('email')  # new optional field
 
     if not username or not password:
         return jsonify({"error": "Username and password required"}), 400
@@ -38,11 +39,11 @@ def register():
     if User.get_by_username(username):
         return jsonify({"error": "Username already exists"}), 400
 
-    new_user = User(username=username, password=password)
+    new_user = User(username=username, password=password, email=email)
     db.session.add(new_user)
     db.session.commit()
 
-    print('Successfully registered user:', username, 'with password:', password)
+    print(f"Successfully registered user: {username} (email: {email})")
 
     return jsonify({"message": f"User {username} registered successfully"}), 201
 
