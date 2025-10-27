@@ -1,0 +1,160 @@
+/* Importing font used in other pages */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
+
+/* Declaring colors as constants because of frequent use of them */
+:root{
+    --dark-green : hsl(170, 100%, 15%);
+    --light-green : hsl(170, 100%, 25%);
+    --white : hsl(177, 41%, 91%);
+    --black : hsl(0, 0%, 20%);
+    --error-red: hsl(0, 80%, 55%);
+    --success-green: hsl(120, 60%, 40%);
+}
+
+/* Global Style */
+body{
+    font-family: 'Inter', sans-serif;
+    background-color: var(--dark-green);
+    min-height: 100vh;
+    margin: 0;
+
+    /* Centering the card */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    box-sizing: border-box;
+}
+
+/* Card container */
+#settings-card{
+    background-color: var(--white);
+    padding: 3rem 3rem;
+    border-radius: 15px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 25);
+    width: 100%;
+    max-width: 400px;
+    height: auto;
+    text-align: center;
+    transition: all 0.3s ease;
+}
+
+/* Title */
+#form-title{
+    color: var(--light-green);
+    font-size: 2rem;
+    font-weight: bolder;
+    text-align: center;
+    margin-bottom: 0.5rem;
+}
+
+/* Subtitle */
+.subtitle{
+    font-size: 1.1rem;
+    font-weight: bold;
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+/* Inputs */
+form > div{
+    margin-bottom: 1.5rem;
+}
+
+.api-item{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.25rem;
+    padding: 10px 0;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.api-item > label{
+    color: var(--dark-green);
+    font-size: 1rem;
+    font-weight: bold;
+    text-align: left;
+    flex-grow: 1;
+}
+
+.api-item input[type = "checkbox"]{
+    accent-color: var(--light-green);
+    cursor: pointer;
+    width: 20px;
+    height: 20px;
+}
+
+#save-button{
+    width: 100%;
+    height: auto;
+    padding: 0.75rem;
+    border: none;
+    border-radius: 10px;
+    font-size: 1rem;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: var(--dark-green);
+    color: var(--white);
+    cursor: pointer;
+    transition: background-color 0.3 ease, box-shadow 0.2s ease;
+}
+
+#save-button:hover{
+    background-color: hsl(173, 100%, 20%);
+}
+
+#save-button:hover:not(:disabled){
+    background-color: hsl(170, 100%, 35%);
+}
+
+#save-button:disabled{
+    background-color: var(--dark-green);
+    cursor: not-allowed;
+    opacity: 0.7;
+}
+
+/* --- Status Message box style */
+#message-box{
+    display: none;
+    padding: 15px;
+    border-radius: 10px;
+    margin-bottom: 25px;
+    font-size: 0.875rem;
+    font-weight: bolder;
+    text-align: left;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* Success message style */
+.message-success{
+    background-color: hsl(120, 60%, 90%);
+    color: var(--success-green);
+    border: 1px solid var(--success-green);
+}
+
+/* Error message style */
+.message-error{
+    background-color: hsl(0, 80%, 90%);
+    color: var(--error-red);
+    border: 1px solid var(--error-red);
+}
+
+/* Keyframes for the spinner animation */
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Spinner element inside the button */
+.loading-spinner {
+    border: 3px solid rgba(255, 255, 255, 0.3);
+    border-top: 3px solid var(--white); /* The colored part of the spinner */
+    border-radius: 50%;
+    width: 1em; /* Matches font size */
+    height: 1em;
+    animation: spin 1s linear infinite;
+    margin-right: 8px; /* Space between spinner and text */
+}
