@@ -1,29 +1,67 @@
-from flask import Flask, request, jsonify
-from flask_cors import CORS
-from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
+from flask import Flask, request, jsonify, send_from_directory, redirect, url_for
 from flask_sqlalchemy import SQLAlchemy
-
-from flask_login import current_user, login_required
-
+import logging
+import os
+from flask_cors import CORS
 from Models import User, db
-#import UserSettings
 
-app = Flask(__name__)
+from flask_login import LoginManager, login_user, login_required, logout_user, current_user
+
+BASE_DIR = os.path.abspath(os.path.dirname(__file__))
+FRONTEND_DIR = os.path.abspath(os.path.join(BASE_DIR, '..', 'Front-end'))
+CREDENTIALS_FILE = os.path.join(BASE_DIR, 'credentials.txt')
+
+app = Flask(__name__,
+            static_folder=FRONTEND_DIR,
+            static_url_path='')
+
+CORS(app, supports_credentials=True,
+     origins=["http://localhost:5000", "http://127.0.0.1:5000", "http://127.0.0.1:5500"])
+
 app.secret_key = "supersecretkey"
-
-CORS(app)
-# import logging
-# log = logging.getLogger('werkzeug')
-# log.setLevel(logging.ERROR)
-
 
 login_manager = LoginManager()
 login_manager.init_app(app)
 
+login_manager.login_view = 'login_page'
+
 
 @login_manager.user_loader
 def load_user(user_id):
-    return User.query.get(int(user_id))
+    return db.session.get(User, int(user_id))
+
+
+@login_manager.unauthorized_handler
+def unauthorized():
+    if request.path.startswith('/settings') or request.path.startswith('/dashboard'):
+        return jsonify({"error": "Unauthorized"}), 401
+    return redirect(url_for('login_page'))
+
+
+@app.route('/')
+def index():
+    if current_user.is_authenticated:
+        return redirect(url_for('home_page'))
+    return redirect(url_for('login_page'))
+
+
+@app.route('/Home/')
+@login_required
+def home_page():
+    return send_from_directory(app.static_folder, 'Home/Home.html')
+
+
+@app.route('/Login/')
+def login_page():
+    if current_user.is_authenticated:
+        return redirect(url_for('home_page'))
+    return send_from_directory(app.static_folder, 'Login/Login.html')
+
+
+@app.route('/Settings/')
+@login_required
+def settings_page():
+    return send_from_directory(app.static_folder, 'Settings/Settings.html')
 
 
 @app.route('/register', methods=['POST'])
@@ -31,18 +69,17 @@ def register():
     data = request.get_json()
     username = data.get('username')
     password = data.get('password')
+    email = data.get('email')
 
     if not username or not password:
         return jsonify({"error": "Username and password required"}), 400
 
-    if User.get_by_username(username):
+    if User.query.filter_by(username=username).first():
         return jsonify({"error": "Username already exists"}), 400
 
-    new_user = User(username=username, password=password)
+    new_user = User(username=username, password=password, email=email)
     db.session.add(new_user)
     db.session.commit()
-
-    print('Successfully registered user:', username, 'with password:', password)
 
     return jsonify({"message": f"User {username} registered successfully"}), 201
 
@@ -50,26 +87,22 @@ def register():
 @app.route('/login', methods=['POST'])
 def login():
     data = request.get_json()
-    print(data)
     username = data.get('username')
     password = data.get('password')
 
-    user = User.get_by_username(username)
+    user = User.query.filter_by(username=username).first()
     if not user or user.password != password:
         return jsonify({"error": "Invalid credentials"}), 401
 
-    login_user(user)
-    print('User successfully logged in :', username)
-    if hasattr(user, 'settings') and user.settings:
-        user_settings = user.settings.settings
-    else:
-        user_settings = None
+    # remember=True makes the cookie persistent
+
+    login_user(user, remember=True)
+    print(f'User {username} successfully logged in, setting session cookie.')
 
     return jsonify({
         "message": "Login successful",
-        "user": username,
-        "settings": user_settings
-    }), 200
+        "redirect": url_for('home_page')
+    })
 
 
 @app.route('/settings', methods=['GET', 'POST'])
@@ -78,15 +111,9 @@ def settings():
     user = current_user
 
     if request.method == 'GET':
-        if hasattr(user, 'settings') and user.settings:
-            user_settings = user.settings.settings
-        else:
-            user_settings = None
-
-        return jsonify({
-            "username": user.username,
-            "settings": user_settings
-        })
+        user_settings = getattr(user, 'settings', None)
+        settings_data = user_settings.settings if user_settings else None
+        return jsonify({"settings": settings_data})
 
     elif request.method == 'POST':
         data = request.get_json()
@@ -95,42 +122,55 @@ def settings():
         if new_settings is None:
             return jsonify({"error": "No settings provided"}), 400
 
+        from Models import UserSettings
+        user_settings_obj = getattr(user, 'settings', None)
 
-        if hasattr(user, 'settings') and user.settings:
-            user.settings.settings = new_settings
+        if user_settings_obj:
+            user_settings_obj.settings = new_settings
         else:
-            from Models import UserSettings
-            user_settings = UserSettings(user_id=user.id, settings=new_settings)
-            db.session.add(user_settings)
+            new_settings_entry = UserSettings(user_id=user.id, settings=new_settings)
+            db.session.add(new_settings_entry)
 
         db.session.commit()
+        return jsonify({"message": "Settings updated successfully"})
 
-        return jsonify({
-            "message": "Settings updated successfully"
-        })
 
 @app.route('/dashboard', methods=['GET'])
 @login_required
 def dashboard():
-    print('Dashboard returned to user')
-    return jsonify({"message": f"Hello {current_user.username}, welcome to your dashboard!"})
+    return jsonify({"message": f"Hello {current_user.username}, welcome!"})
 
 
 @app.route('/logout', methods=['POST'])
 @login_required
 def logout():
     logout_user()
-    print('user logged out')
     return jsonify({"message": "Logged out successfully"}), 200
 
 
 if __name__ == "__main__":
-    with open('C:/Users/ignat/Desktop/Aktív/assistantfolder/WebAssistant/Backend/credentials.txt') as file:
-        dbstring = file.readline()
-        app.config[
-            'SQLALCHEMY_DATABASE_URI'] = dbstring
-        app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-        db.init_app(app)
+    try:
+        with open(CREDENTIALS_FILE) as file:
+            dbstring = file.readline().strip()
+            if not dbstring:
+                raise ValueError("Credentials file is empty.")
+            app.config['SQLALCHEMY_DATABASE_URI'] = dbstring
+            app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+            db.init_app(app)
+            print("Database initialized successfully.")
 
-    app.run()
-    print('running')
+    except FileNotFoundError:
+        print(f"CRITICAL ERROR: {CREDENTIALS_FILE} not found. Database will not connect.")
+    except ValueError as e:
+        print(f"CRITICAL ERROR: {e}")
+    except Exception as e:
+        print(f"CRITICAL DATABASE ERROR: {e}")
+
+    with app.app_context():
+        try:
+            db.create_all()
+            print("Database tables checked/created.")
+        except Exception as e:
+            print(f"Error creating database tables: {e}")
+
+    app.run(host='0.0.0.0', port=5000, debug=True)

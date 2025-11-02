@@ -4,19 +4,16 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login Screen</title>
-    <link rel="stylesheet" href="LoginStyle.css">
+    <link rel="stylesheet" href="LoginStyle.css?v=1.1">
 </head>
 <body>
-    <!-- Auth Card Container-->
-     <div id="auth-card">
+    <div id="auth-card">
         <h1 id="form-title">Please Login</h1>
 
-        <!-- Status / Error Message Box-->
-         <div id="message-box" role="alert">
+        <div id="message-box" role="alert">
             <p id="message-text"></p>
          </div>
 
-         <!-- Login Form -->
          <form id="login-form">
             <div>
                 <label for="login-username">Your Username</label>
@@ -29,8 +26,7 @@
             <button type="submit" id="login-button">Log In</button>
          </form>
 
-         <!-- Registration Form -->
-          <form id="register-form">
+         <form id="register-form">
             <div>
                 <label for="register-username">Your username</label>
                 <input type="text" id="register-username" name="username"
@@ -51,14 +47,13 @@
             <button type="submit" id="register-button">Register</button>
           </form>
 
-          <!-- Toggle Button for Registration-->
-           <div>
+          <div>
             <button id="toggle-auth-btn">
                 Don't have an account yet? Register here.
             </button>
            </div>
      </div>
 
-     <script src="Login.js"></script>
+     <script src="Login.js?v=1.1"></script>
 </body>
 </html>

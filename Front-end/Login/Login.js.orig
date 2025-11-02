@@ -74,33 +74,29 @@ function toggleAuthMode(){
 
 // Backend communication with fetch
 async function sendAuthRequest(endpoint, data, button) {
-    const originalText = button.textContent;
     const url = `${API_BASE_URL}${endpoint}`;
-    //const originalText = button.textContent;
 
-    setButtonLoadingState(button, true, originalText);
+    setButtonLoadingState(button, true);
 
     for (let attempt = 0; attempt < MAX_TRIES; attempt++){
         try {
             const response = await fetch(url, {
                 method: 'POST',
-                credentials: 'include', // Ensure cookie is sent/received
                 headers: {'Content-Type' : 'application/json'},
                 body: JSON.stringify(data)
             });
             const result = await response.json();
 
             if(response.ok){
-                // Successful login/registration
-                showMessage(result.message || `Success ${endpoint === '/login' ? 'Logged in' : 'Account Created'}`, 'success');
+                // Successful login
+                showMessage(result.message || `Success ${endpoint === '/login' ? 'Logged in' : 'Account Created'}, 'success`);
 
-                // FIX: Use the 'redirect' URL provided by the server
-                if (endpoint === '/login' && result.redirect) {
-                    window.location.href = result.redirect;
-                } else if (endpoint === '/register') {
-                    // Optionally switch to login view or redirect after successful registration
-                    toggleAuthMode();
-                }
+                // Redirect after successful login / registration
+<<<<<<< HEAD:Front-end/Login.js
+                //window.location.href = 'home.html';
+=======
+                window.location.href = '/Home/Home.html';
+>>>>>>> origin/main:Front-end/Login/Login.js
 
                 setButtonLoadingState(button, false, originalText);
                 return; // Exiting successfully

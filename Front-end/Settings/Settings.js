@@ -1,7 +1,7 @@
 /* Configuration */
 const API_BASE_URL = 'http://localhost:5000';
-const SAVE_ENDPOINT = `${API_BASE_URL}/api/settings`;
-const LOAD_ENDPOINT = `${API_BASE_URL}/api/settings`;
+const SAVE_ENDPOINT = `${API_BASE_URL}/settings`;
+const LOAD_ENDPOINT = `${API_BASE_URL}/settings`;
 
 /* DOM Element References */
 const settingsForm = document.getElementById('settings-form');
@@ -49,18 +49,18 @@ function setButtonState(button, isLoading, originalText){
 
 /* Fetching the existing preferences of the user */
 async function loadInitialPreferences() {
-    const allCheckBoxes = document.querySelectorAll('api_preference');
+    const allCheckboxes = document.querySelectorAll('input[name="api_preference"]'); 
 
-    // Checking all boxes for new users or load failiure
-    allCheckBoxes.forEach(checkbox => {
+    allCheckboxes.forEach(checkbox => {
         checkbox.checked = true;
     })
 
     try{
         const response = await fetch(LOAD_ENDPOINT, {
             method: 'GET',
+            credentials: 'include',
             headers: {
-                'Content Type' : 'application/json',
+                'Content-Type' : 'application/json',
             },
         });
 
@@ -69,9 +69,8 @@ async function loadInitialPreferences() {
             const userSettings = data.settings || {};
             const enabledAPIs = userSettings.enabledApis || [];
             
-            // Only proceeding if the server returned saved data
             if (enabledAPIs.length > 0){
-                allCheckBoxes.forEach(checkbox => {
+                allCheckboxes.forEach(checkbox => {
                     checkbox.checked = false;
                 })
 
@@ -79,20 +78,20 @@ async function loadInitialPreferences() {
                     const checkbox = document.getElementById(`api-${apiValue}`);
                     if (checkbox){
                         checkbox.checked = true;
-                    }});}
-
-                else{
-                    console.log('User has saved settings, but the list is empty. Showing all checked by default.')
-                }
+                    }
+                });
+            } else{
+                console.log('User has saved settings, but the list is empty. Showing all checked by default.')
             }
+        }
         else if (response.status === 404 || response.status === 401){
-            console.warn('Could not load preferences. Defaulting to all checked');
+            console.warn('Could not load preferences (401/404). Defaulting to all checked');
         }
         else{
             console.error(`Failed to load the preferences with status: ${response.status}`);
             showMessage('Error loading saved preferences.', 'error');
         }
-}
+    }
     catch(error){
         console.error(`Network error during initial load. Defaulting to all checked: ${error}`);
     }
@@ -103,8 +102,6 @@ async function handleSavePreferences(e) {
     e.preventDefault();
 
     const originalText = saveButton.textContent;
-
-    // Collecting checked APIs
     const enabledApis = [];
     const checkboxes = settingsForm.querySelectorAll('input[name="api_preference"]:checked');
 
@@ -112,7 +109,6 @@ async function handleSavePreferences(e) {
         enabledApis.push(checkbox.value);
     })
 
-    // Formating the JSON payload
     const payload = {
         settings : {enabledApis : enabledApis}
     };
@@ -121,10 +117,10 @@ async function handleSavePreferences(e) {
 
     setButtonState(saveButton, true, originalText);
 
-    // Sending to backend
     try{
         const response = await fetch(SAVE_ENDPOINT, {
             method: 'POST',
+            credentials: 'include', 
             headers: {
                 'Content-Type': 'application/json',
             },
@@ -134,13 +130,21 @@ async function handleSavePreferences(e) {
         if(response.ok){
             showMessage('Preferences saved succesfully', 'success');
         }
+        else if (response.status === 401){
+            showMessage('Session expired or unauthorized. Please log in again.', 'error');
+            setTimeout(() => {
+                // *** MODIFIED ***
+                // Changed from "../Login/Login.html" to the route "/Login/"
+                window.location.href = '/Login/';
+            }, 1000);
+        }
         else{
             const errorText = response.statusText || 'Unknown Error';
             showMessage(`Failed to save preferences. Server response: ${response.status} - ${errorText}`, 'error');
         }
     }
     catch(error){
-        console.error('Network error during API save:', 'error');
+        console.error('Network error during API save:', error);
         showMessage('Could not connect to the API server. Check your network or backend URL.');
     }
     finally{
@@ -151,6 +155,5 @@ async function handleSavePreferences(e) {
 // --- Initialization ---
 document.addEventListener('DOMContentLoaded', () => {
     loadInitialPreferences();
-
     settingsForm.addEventListener('submit', handleSavePreferences);
 })
