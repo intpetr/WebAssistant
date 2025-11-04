@@ -23,7 +23,8 @@ nav {
 }
 
 .login-button,
-.setting-button {
+.setting-button,
+.calendar-button {
   text-decoration: none;
   border: 5px solid var(--white);
   background-color: var(--white);
