@@ -1,0 +1,275 @@
+/* Importing font used in other pages */
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap");
+
+/* Declaring constants for colors */
+:root {
+  --dark-green: hsl(170, 100%, 15%);
+  --light-green: hsl(170, 100%, 25%);
+  --white: hsl(177, 41%, 91%);
+  --black: hsl(0, 0%, 20%);
+  --error-red: hsl(0, 80%, 55%);
+  --success-green: hsl(120, 60%, 40%);
+  --light-grey: #f0f0f0;
+}
+
+/* Global Style and Layout */
+body {
+  font-family: "Inter", sans-serif;
+  background-color: var(--dark-green);
+  min-height: 100vh;
+  margin: 0;
+  padding: 20px;
+  box-sizing: border-box;
+  display: flex;
+  justify-content: center;
+}
+
+#calendar-app {
+  background-color: var(--white);
+  color: var(--black);
+  padding: 2rem;
+  border-radius: 15px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+}
+
+/* Status Message Box Style */
+#message-box {
+  padding: 15px;
+  border-radius: 10px;
+  margin-bottom: 20px;
+  font-size: 0.875rem;
+  font-weight: bolder;
+  text-align: left;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.hidden {
+  display: none !important;
+}
+
+.message-success {
+  background-color: hsl(120, 60%, 90%);
+  color: var(--success-green);
+  border: 1px solid var(--success-green);
+}
+
+.message-error {
+  background-color: hsl(0, 80%, 90%);
+  color: var(--error-red);
+  border: 1px solid var(--error-red);
+}
+
+/* Full Calendar Theming */
+#full-calendar {
+  padding: 10px;
+  border-radius: 10px;
+}
+
+/* Header Toolbar (Prev/Next/Today/Views */
+.fc-toolbar-title {
+  font-size: 1.5rem !important;
+  font-weight: 700 !important;
+  color: var(--dark-green) !important;
+}
+
+/* Default FullCalendar Buttons */
+.fc-button {
+  background-color: var(--light-green) !important;
+  color: var(--white) !important;
+  border: none !important;
+  border-radius: 8px !important;
+  padding: 8px 12px !important;
+  font-weight: 600 !important;
+  transition: background-color 0.2s;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.fc-button:hover:not(:disabled) {
+  background-color: hsl(170, 100%, 35%) !important;
+}
+
+/* Active/Selected button */
+.fc-button-primary:not(:disabled).fc-button-active,
+.fc-button-primary:not(:disabled).fc-button-active:focus,
+.fc-button-primary:not(:disabled).fc-button-active:hover {
+  background-color: var(--dark-green) !important;
+  color: var(--white) !important;
+}
+
+/* Day Names */
+.fc-col-header-cell-cushion {
+  color: var(--dark-green);
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+/* Event Styling */
+.fc-event {
+  border-radius: 4px !important;
+  font-size: 0.85rem !important;
+  font-weight: 600 !important;
+  padding: 2px 4px;
+  cursor: pointer;
+  margin: 1px;
+  opacity: 0.9;
+  transform: opacity 0.1s;
+}
+
+.fc-event:hover {
+  opacity: 1;
+}
+
+/* Model styles */
+.model {
+  position: fixed;
+  z-index: 1000;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  overflow: auto;
+  background-color: rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.model-content {
+  background-color: var(--white);
+  padding: 30px;
+  border-radius: 15px;
+  width: 90%;
+  max-width: 500px;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+  color: var(--black);
+}
+
+#model-title {
+  color: var(--dark-green);
+  font: 1.75rem;
+  margin-top: 0;
+  margin-bottom: 1.5rem;
+  border-bottom: 2px solid var(--light-green);
+  padding-bottom: 5px;
+}
+
+.form-group {
+  margin-bottom: 15px;
+}
+
+.form-group label {
+  display: block;
+  font-weight: 600;
+  margin-bottom: 5px;
+  color: var(--dark-green);
+}
+
+.form-group input[type="text"],
+.form-group input[type="date"],
+.form-group input[type="time"],
+.form-group textarea {
+  width: 100%;
+  padding: 10px;
+  border: 2px solid var(--light-grey);
+  border-radius: 8px;
+  box-sizing: border-box;
+  font-size: 1rem;
+  transition: border-color 0.2s;
+}
+
+.form-group input:focus,
+.form-group textarea:focus {
+  border-color: var(--light-green);
+  outline: none;
+}
+
+.time-inputs {
+  display: flex;
+  gap: 15px;
+}
+
+.time-inputs > div {
+  flex: 1;
+}
+
+.checkbox-group {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.checkbox-group input[type="checkbox"] {
+  width: 20px;
+  height: 20px;
+  accent-color: var(--light-green);
+}
+
+.checkbox-group label {
+  margin-bottom: 0;
+  font-weight: 400;
+}
+
+.model-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.action-button {
+  padding: 10px 15px;
+  border: none;
+  border-radius: 8px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background-color 0.2s, box-shadow 0.2s;
+}
+
+.primary-button {
+  background-color: var(--dark-green);
+  color: var(--white);
+}
+
+.primary-button:hover:not(:disabled) {
+  background-color: hsl(0, 70%, 45%);
+}
+
+.delete-button {
+  background-color: var(--error-red);
+  color: var(--white);
+}
+
+.delete-button:hover:not(:disabled) {
+  background-color: hsl(0, 70%, 45%);
+}
+
+.secondary-button {
+  background-color: var(--light-grey);
+  color: var(--black);
+}
+
+.secondary-button:hover:not(:disabled) {
+  background-color: #ddd;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  #calendar-app {
+    padding: 1rem;
+    width: 100%;
+  }
+  .modal-content {
+    width: 95%;
+    padding: 20px;
+  }
+  .time-inputs {
+    flex-direction: column;
+    gap: 0;
+  }
+  /* Smaller calendar buttons on mobile */
+  .fc-button {
+    padding: 6px 8px !important;
+    font-size: 0.8rem !important;
+  }
+}
