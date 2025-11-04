@@ -87,6 +87,7 @@ async function sendAuthRequest(endpoint, data, button) {
 
     if (response.ok) {
       // Succesful login / registration
+      localStorage.setItem("isLoggedIn", "true");
       showMessage(
         result.message ||
           `Success ${endpoint === "/login" ? "Logged in" : "Account created"}`,

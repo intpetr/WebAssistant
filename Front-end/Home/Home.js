@@ -3,9 +3,16 @@ const DASHBOARD_ENDPOINT = `${api}/dashboard`;
 
 // Function to handle navigation to the settings page
 function windowChange() {
-  // *** MODIFIED ***
-  // Changed from "../Settings/Settings.html" to the route "/Settings/"
   window.location.href = "/Settings/";
+}
+
+// Function to handle showing/hiding the Login/Register button
+function handleLoginButtonDisplay(isLoggedIn) {
+  const loginRegisterBtn = document.getElementById("login-register-btn");
+  if (loginRegisterBtn) {
+    // Hide the button if user is logged in
+    loginRegisterBtn.style.display = isLoggedIn ? "none" : "inline-block";
+  }
 }
 
 // Function to check if the user is currently logged in

@@ -1,31 +1,35 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap");
 
 /* Declaring colors as constants because of frequent use of them */
-:root{
-    --dark-green : hsl(170, 100%, 15%);
-    --white : hsl(177, 41%, 91%);
-    --black : hsl(0, 0%, 20%);
+:root {
+  --dark-green: hsl(170, 100%, 15%);
+  --white: hsl(177, 41%, 91%);
+  --black: hsl(0, 0%, 20%);
 }
 
-body{
-    font-family: 'Inter', sans-serif;
-    background-color: var(--white);
-    color: var(--dark-green);
+body {
+  font-family: "Inter", sans-serif;
+  background-color: var(--white);
+  color: var(--dark-green);
 }
 
-header{
-    width: 100%;
-    border-bottom: 5px solid var(--black);
+nav {
+  width: 100%;
+  border-bottom: 5px solid var(--black);
+  background-color: var(--dark-green);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 
-.login-button {
-    text-decoration: none;
-    border: 5px solid var(--white);
-    background-color: var(--dark-green);
-    border-radius: 15px;
-    color:  var(--white);
-    display: inline-block;
-    text-align: right;
-    padding: 10px 10px;
-    margin: 5px 5px;
+.login-button,
+.setting-button {
+  text-decoration: none;
+  border: 5px solid var(--white);
+  background-color: var(--white);
+  border-radius: 15px;
+  color: var(--dark-green);
+  display: inline-block;
+  padding: 10px 10px;
+  margin: 5px 5px;
 }
