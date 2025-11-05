@@ -21,3 +21,34 @@ const startTimeInput = document.getElementById("event-start-time");
 const endTimeInput = document.getElementById("event-end-time");
 const descriptionInput = document.getElementById("event-description");
 const notifyCheckbox = document.getElementById("event-notify");
+
+/* --Utility functions consistent with other files-- */
+/* Status message */
+function showMessage(message, type = "error") {
+  messageBox.classList.remove("message-success", "message-error ", "hidden");
+
+  if (type === "success") {
+    messageBox.classList.add("message-success");
+  } else {
+    messageBox.classList.add("message-error");
+  }
+
+  messageText.textContent = message;
+
+  /* Auto hiding message after 5 seconds */
+  setTimeout(() => {
+    messageBox.classList.add("hidden");
+    messageBox.textContent = "";
+  }, 5000);
+}
+
+/* Setting the loading state of a button */
+function setButtonLoadingState(button, isLoading, originalText) {
+  if (isLoading) {
+    button.disabled = true;
+    button.innerHTML = `<span class="loading-spinner"></span> Saving...`;
+  } else {
+    button.disabled = false;
+    button.innerHTML = originalText;
+  }
+}
