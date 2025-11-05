@@ -11,7 +11,7 @@ const modelTitle = document.getElementById("model-title");
 const eventForm = document.getElementById("event-form");
 const saveButton = document.getElementById("save-event-btn");
 const deleteButton = document.getElementById("delete-event-btn");
-const cancelButton = document.getElementById("cancel-event-btn");
+const closeButton = document.getElementById("cancel-event-btn");
 const messageBox = document.getElementById("message-box");
 const messageText = document.getElementById("message-text");
 
@@ -328,3 +328,59 @@ async function handleEventChange(info) {
     );
   }
 }
+
+/* --Main Initialization-- */
+document.addEventListener("DOMContentLoaded", function () {
+  // Initialize FullCalendar
+  calendar = new FullCalendar.Calendar(calendarE1, {
+    plugins: ["dayGrid", "timeGrid", "interaction"],
+    initialView: "dayGridMonth",
+    headerToolbar: {
+      left: "prev, next today",
+      center: "title",
+      right: "dayGridMonth, timeGridWeek, timeGridDay",
+    },
+    events: fetchEvents,
+    editable: true,
+
+    // Event Handlers
+    dateClick: function (info) {
+      openModal(null, info.dateStr);
+    },
+    eventClick: function (info) {
+      const eventData = {
+        id: info.event.id,
+        title: info.event.title,
+        date: info.event.extendedProps.date,
+        startTime: info.event.extendedProps.startTime,
+        endTime: info.event.extendedProps.endTime,
+        description: info.event.extendedProps.description,
+        notify: info.event.extendedProps.notify,
+      };
+      openModal(eventData);
+    },
+    eventDrop: handleEventChange,
+    eventResize: handleEventChange,
+
+    dayMaxEvents: true,
+    navLinks: true,
+  });
+
+  calendar.render();
+
+  // Adding Event Listeners
+  eventForm.addEventListener("submit", saveEvent);
+  deleteButton.addEventListener("click", deleteEvent);
+  closeButton.addEventListener("click", closeModel);
+
+  // Closing the model when clicking outside of the content
+  model.addEventListener("click", function (e) {
+    if (e.target === model) {
+      closeModel();
+    }
+  });
+
+  document
+    .getElementById("add-event-btn")
+    .addEventListener("click", () => openModel(null));
+});
