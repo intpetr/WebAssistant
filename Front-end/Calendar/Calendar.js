@@ -9,6 +9,7 @@ const calendarE1 = document.getElementById("full-calendar");
 const model = document.getElementById("event-model");
 const modelTitle = document.getElementById("model-title");
 const eventForm = document.getElementById("event-form");
+const saveButton = document.getElementById("save-event-btn");
 const deleteButton = document.getElementById("delete-event-btn");
 const cancelButton = document.getElementById("cancel-event-btn");
 const messageBox = document.getElementById("message-box");
@@ -43,7 +44,7 @@ function showMessage(message, type = "error") {
 }
 
 /* Setting the loading state of a button */
-function setButtonLoadingState(button, isLoading, originalText) {
+function setButtonState(button, isLoading, originalText) {
   if (isLoading) {
     button.disabled = true;
     button.innerHTML = `<span class="loading-spinner"></span> Saving...`;
@@ -92,4 +93,73 @@ function closeModel() {
   model.classList.add("hidden");
   currentEventId = null;
   eventForm.reset();
+}
+
+/* --Backend API Communication */
+/* Converitng the form data into JSON payload for backend */
+function getEventPayload() {
+  return {
+    id: currentEventId,
+    title: titleInput.value,
+    date: dateInput.value,
+    startTime: startTimeInput.value,
+    endTime: endTimeInput.value,
+    description: descriptionInput.value,
+    notify: notifyCheckbox.checked,
+  };
+}
+
+/* Handling Create and Update operations */
+async function saveEvent(e) {
+  e.preventDefault();
+
+  const payload = getEventPayload();
+
+  if (!payload.title || payload.date || payload.startTime) {
+    return showMessage("Title, Date and Start Time are required", "error");
+  }
+
+  const isNew = !currentEventId;
+  const method = isNew ? "POST" : "PUT";
+  const endPoint = isNew ? "/api/calendar" : `/api/calendar/${currentEventId}`;
+  const originalText = saveButton.textContent;
+  setButtonState(saveButton, true, originalText);
+
+  try {
+    const response = await fetch(API_BASE_URL + endPoint, {
+      method: method,
+      credentials: "include",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    });
+
+    if (response.ok) {
+      const result = await response.json();
+      showMessage(
+        `Event successfully ${isNew ? "created" : "updated"}!`,
+        "success"
+      );
+      closeModel();
+      calendar.refetchEvents();
+    } else if (response.status === 401) {
+      showMessage(
+        "Session expired or unauthorized. Please log in again",
+        "error"
+      );
+      setTimeout(() => {
+        window.location.href = "../Login/Login.html";
+      }, 5000);
+    } else {
+      const errorResult = await response.json();
+      showMessage(
+        errorResult.error || `Failed to ${isNew ? "create" : "update"} event`,
+        "error"
+      );
+    }
+  } catch (error) {
+    console.error("API Save Error: ", error);
+    showMessage("Network error: Could not connect to the server.", "error");
+  } finally {
+    setButtonState(saveButton, false, originalText);
+  }
 }
