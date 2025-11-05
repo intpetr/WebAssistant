@@ -52,3 +52,44 @@ function setButtonLoadingState(button, isLoading, originalText) {
     button.innerHTML = originalText;
   }
 }
+
+/* --Model and Form handlers-- */
+/* Opening the model, resetting the form and setting the context */
+function openModel(eventData = null, initialDate = null) {
+  eventForm.reset();
+  currentEventId = null;
+  deleteButton.classList.add("hidden");
+
+  if (eventData) {
+    /* Edit Mode */
+    modelTitle.textContent = "Edit Event";
+    currentEventId = eventData.id;
+
+    /* Populating form fields */
+    titleInput.value = eventData.title || "";
+    dateInput.value = eventData.date || "";
+    startTimeInput.value = eventData.startTime || "08:00";
+    endTimeInput.value = eventData.endTime || "09:00";
+    descriptionInput.value = eventData.description || "";
+    notifyCheckbox.checked = eventData.notify || false;
+
+    deleteButton.classList.remove("hidden");
+  } else {
+    /* Create Mode */
+    modelTitle.textContent = "Create New Event";
+    if (initialDate) {
+      dateInput.value = initialDate;
+    } else {
+      dateInput.value = new Date().toISOString().substring(0, 10);
+    }
+  }
+
+  model.classList.remove("hidden");
+}
+
+/* Closing the model and resetting the context */
+function closeModel() {
+  model.classList.add("hidden");
+  currentEventId = null;
+  eventForm.reset();
+}
