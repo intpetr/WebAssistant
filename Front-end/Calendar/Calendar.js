@@ -163,3 +163,43 @@ async function saveEvent(e) {
     setButtonState(saveButton, false, originalText);
   }
 }
+
+/* Handling delete operations */
+async function deleteEvent() {
+  if (!currentEventId) return;
+
+  const originalText = deleteButton.textContent;
+  setButtonState(deleteButton, true, originalText);
+
+  try {
+    const response = await fetch(
+      `${API_BASE_URL}/api/calendar/${currentEventId}`,
+      {
+        method: "DELETE",
+        credentials: "include",
+      }
+    );
+
+    if (response.ok) {
+      showMessage("Event successfully deleted!", "success");
+      closeModel();
+      calendar.refetchEvents();
+    } else if (response.status === 401) {
+      showMessage(
+        "Session expired or unauthorized. Please log in again",
+        "error"
+      );
+      setTimeout(() => {
+        window.location.href = "../Login/Login.html";
+      }, 5000);
+    } else {
+      const errorResult = await response.json();
+      showMessage(errorResult.error || "Failed to delete event.", "error");
+    }
+  } catch (error) {
+    console.error("API Delete Error: ", error);
+    showMessage("Network error during deletion.", "error");
+  } finally {
+    setButtonState(deleteButton, false, originalText);
+  }
+}
