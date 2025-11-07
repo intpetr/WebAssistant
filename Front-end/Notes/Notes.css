@@ -1,0 +1,278 @@
+/* Importing the font we have used in previous pages */
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap");
+
+/* Declaring the colors we are using */
+:root {
+        --dark-green: hsl(170, 100%, 15%);
+        --light-green: hsl(170, 100%, 25%);
+        --white: hsl(177, 41%, 91%);
+        --black: hsl(0, 0%, 20%);
+        --error-red: hsl(0, 80%, 55%);
+        --success-green: hsl(120, 60%, 40%);
+        --light-grey: #f0f0f0;
+}
+
+/* Status Message Box */
+#message-box {
+        padding: 15px;
+        border-radius: 10px;
+        margin-bottom: 20px;
+        font-size: 0.875rem;
+        font-weight: bolder;
+        text-align: left;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.hidden {
+        display: none !important;
+}
+
+.message-success {
+        background-color: hsl(120, 60%, 90%);
+        color: var(--success-green);
+        border: 1px solid var(--success-green);
+}
+
+.message-error {
+        background-color: hsl(0, 80%, 90%);
+        color: var(--error-red);
+        border: 1px solid var(--error-red);
+}
+
+/* Global Styles & Layout */
+body {
+        font-family: "Inter", sans-serif;
+        background-color: var(--dark-green);
+        min-height: 100vh;
+        margin: 0;
+        padding: 20px;
+        box-sizing: border-box;
+        display: flex;
+        justify-content: center;
+}
+
+.notes-container {
+        background-color: var(--white);
+        color: var(--black);
+        padding: 2rem;
+        border-radius: 15px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        width: 100%;
+        max-width: 1000px;
+        min-height: 80vh;
+        box-sizing: border-box;
+}
+
+.app-title {
+        color: var(--black);
+        font-size: 2.5rem;
+        margin-bottom: 2rem;
+}
+
+.app-subtitle {
+        color: var(--black);
+        font-size: 2rem;
+        margin-bottom: 2rem;
+}
+
+/* Actions Bar & Search */
+.actions-bar {
+        display: flex;
+        gap: 15px;
+        margin-bottom: 25px;
+        align-items: center;
+}
+
+.search-input {
+        flex-grow: 1;
+        padding: 10px 15px;
+        border: 2px solid var(--light-green);
+        border-radius: 10px;
+        font-size: 1rem;
+        transition: border-color 0.2s;
+}
+
+.search-input:focus {
+        border-color: var(--dark-green);
+        outline: none;
+}
+
+/* Form styling */
+.note-form {
+        background-color: var(--light-grey);
+        padding: 20px;
+        border-radius: 15px;
+        margin-bottom: 30px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.note-title-input {
+        width: 100%;
+        padding: 10px 15px;
+        margin-bottom: 10px;
+        border: 1px solid #ccc;
+        border-radius: 10px;
+        font-size: 1.1rem;
+        font-weight: bolder;
+}
+
+.note-content-input {
+        width: 100%;
+        min-height: 150px;
+        padding: 15px;
+        margin-bottom: 15px;
+        border: 1px solid #ccc;
+        border-radius: 10px;
+        font-size: 1rem;
+        resize: vertical;
+}
+
+.note-title-input:focus,
+.note-content-input:focus {
+        border-color: var(--light-green);
+        outline: none;
+}
+
+.form-actions {
+        display: flex;
+        justify-content: flex-end;
+        gap: 10px;
+}
+
+/* Button Styles */
+.primary-button,
+.secondary-button {
+        padding: 10px 15px;
+        border: none;
+        border-radius: 10px;
+        font-weight: bolder;
+        cursor: pointer;
+        transition: background-color 0.2s;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+}
+
+.primary-button {
+        background-color: var(--dark-green);
+        color: var(--white);
+}
+
+.primary-button:hover:not(:disabled) {
+        background-color: var(--light-green);
+}
+
+.secondary-button {
+        background-color: #ddd;
+        color: var(--black);
+}
+
+.secondary-button:hover:not(:disabled) {
+        background-color: #ccc;
+}
+
+/* Note List Grid Layout */
+.notes-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+        gap: 20px;
+}
+
+.initial-message {
+        grid-column: 1 / -1;
+        text-align: center;
+        color: var(--black);
+        padding: 40px;
+        font-style: italic;
+}
+
+/* Individual Note Card Styles */
+.note-card {
+        background-color: #ffffff;
+        border: 1px solid var(--light-green);
+        border-top: 5px solid var(--light-green);
+        border-radius: 10px;
+        padding: 15px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        transition: transform 0.2s;
+}
+
+.note-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 6px 10px rgba(0, 0, 0, 0.15);
+}
+
+.note-title {
+        font-size: 1.2rem;
+        font-weight: bolder;
+        color: var(--dark-green);
+        margin-bottom: 5px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+}
+
+.note-content {
+        font-size: 0.95rem;
+        color: #555;
+        margin-bottom: 10px;
+        display: -webkit-box;
+        -webkit-line-clamp: 4;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+}
+
+.note-footer {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-top: 1px solid #eee;
+        padding-top: 10px;
+        margin-top: 5px;
+}
+
+.note-date {
+        font-size: 0.75rem;
+        color: #888;
+}
+
+.note-actions button {
+        background: none;
+        border: none;
+        cursor: pointer;
+        color: var(--light-green);
+        margin-left: 10px;
+        transition: color 0.2s;
+        font-size: 1rem;
+}
+
+.note-actions .delete-btn {
+        color: var(--error-red);
+}
+
+.note-actions button:hover {
+        color: var(--dark-green);
+}
+
+/* Loading Spinner for JS */
+.loading-spinner {
+        border: 4px solid rgba(255, 255, 255, 0.3);
+        border-top: 4px solid white;
+        border-radius: 50%;
+        width: 20px;
+        height: 20px;
+        animation: spin 1s linear infinite;
+        margin-right: 10px;
+}
+
+@keyframes spin {
+        0% {
+                transform: rotate(0deg);
+        }
+        100% {
+                transform: rotate(360deg);
+        }
+}
