@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+        <head>
+                <meta charset="UTF-8" />
+                <meta
+                        name="viewport"
+                        content="width=device-width, initial-scale=1.0"
+                />
+                <title>Personal Notes</title>
+        </head>
+        <body>
+                <div id="notes-app" class="note-container">
+                        <h1 class="app-title">Personal Notes</h1>
+                        <p class="app-subtitle">
+                                Write, Edit, and search your notes
+                        </p>
+
+                        <!-- Status / Error message box -->
+                        <div id="message-box" role="alert" class="hidden">
+                                <p id="message-text"></p>
+                        </div>
+
+                        <!-- Search and Actions Bar -->
+                        <div class="action-bar">
+                                <input
+                                        type="text"
+                                        id="search-input"
+                                        class="search-input"
+                                        placeholder="Search notes by title or content..."
+                                />
+                                <button
+                                        id="new-note-toggle-btn"
+                                        class="primary-button"
+                                >
+                                        <i class="fa-solid fa-plus"></i> Add new
+                                        Note
+                                </button>
+                        </div>
+
+                        <!--Note Creation / Edit Form-->
+                        <form id="note-form" class="note-form hidden">
+                                <input type="hidden" id="note-id" value="" />
+
+                                <input
+                                        type="text"
+                                        id="note-title"
+                                        class="note-title-input"
+                                        placeholder="Note Title (Optional)"
+                                        maxlength="100"
+                                />
+
+                                <textarea
+                                        id="note-content"
+                                        placeholder="Write your note here"
+                                        required
+                                        class="note-content-input"
+                                ></textarea>
+
+                                <div class="form-actions">
+                                        <button
+                                                type="submit"
+                                                id="save-note-btn"
+                                                class="primary-button"
+                                        >
+                                                <i
+                                                        class="fa-solid fa-floppy-disk"
+                                                ></i>
+                                                Save Note
+                                        </button>
+                                        <button
+                                                type="button"
+                                                id="cancel-edit-btn"
+                                                class="secondary-button"
+                                        >
+                                                Cancel
+                                        </button>
+                                </div>
+                        </form>
+
+                        <!-- List of notes, where notes will be injected by JS-->
+                        <div id="notes-list" class="notes-grid">
+                                <p class="initial-message">Loading notes...</p>
+                        </div>
+                </div>
+
+                <script
+                        src="https://kit.fontawesome.com/9a9b8af8bd.js"
+                        crossorigin="anonymous"
+                ></script>
+        </body>
+</html>
