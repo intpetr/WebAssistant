@@ -7,13 +7,15 @@ from Models import User, db
 
 from flask_login import LoginManager, login_user, login_required, logout_user, current_user
 
+import api_calls
+
 BASE_DIR = os.path.abspath(os.path.dirname(__file__))
 FRONTEND_DIR = os.path.abspath(os.path.join(BASE_DIR, '..', 'Front-end'))
 CREDENTIALS_FILE = os.path.join(BASE_DIR, 'credentials.txt')
 
 app = Flask(__name__,
             static_folder=FRONTEND_DIR,
-            static_url_path='')
+            static_url_path='')  # This remains, to serve your HTML pages from root
 
 CORS(app, supports_credentials=True,
      origins=["http://localhost:5000", "http://127.0.0.1:5000", "http://127.0.0.1:5500"])
@@ -23,6 +25,7 @@ app.secret_key = "supersecretkey"
 login_manager = LoginManager()
 login_manager.init_app(app)
 
+# This remains 'login_page' - it's the *route name* for the HTML login page
 login_manager.login_view = 'login_page'
 
 
@@ -33,10 +36,16 @@ def load_user(user_id):
 
 @login_manager.unauthorized_handler
 def unauthorized():
-    if request.path.startswith('/settings') or request.path.startswith('/dashboard'):
+    # UPDATED: Check if the request is for an API endpoint
+    # If so, return a JSON 401 error, which is much better for fetch() calls
+    if request.path.startswith('/api/'):
         return jsonify({"error": "Unauthorized"}), 401
+
+    # Otherwise, it's a page request, so redirect to the login page
     return redirect(url_for('login_page'))
 
+
+# --- Page Serving Routes (No changes) ---
 
 @app.route('/')
 def index():
@@ -64,7 +73,9 @@ def settings_page():
     return send_from_directory(app.static_folder, 'Settings/Settings.html')
 
 
-@app.route('/register', methods=['POST'])
+# --- API Endpoints (Prefix added) ---
+
+@app.route('/api/register', methods=['POST'])
 def register():
     data = request.get_json()
     username = data.get('username')
@@ -84,7 +95,7 @@ def register():
     return jsonify({"message": f"User {username} registered successfully"}), 201
 
 
-@app.route('/login', methods=['POST'])
+@app.route('/api/login', methods=['POST'])
 def login():
     data = request.get_json()
     username = data.get('username')
@@ -94,18 +105,17 @@ def login():
     if not user or user.password != password:
         return jsonify({"error": "Invalid credentials"}), 401
 
-    # remember=True makes the cookie persistent
-
     login_user(user, remember=True)
     print(f'User {username} successfully logged in, setting session cookie.')
 
     return jsonify({
         "message": "Login successful",
+        # The redirect URL remains a page route
         "redirect": url_for('home_page')
     })
 
 
-@app.route('/settings', methods=['GET', 'POST'])
+@app.route('/api/settings', methods=['GET', 'POST'])
 @login_required
 def settings():
     user = current_user
@@ -135,18 +145,76 @@ def settings():
         return jsonify({"message": "Settings updated successfully"})
 
 
-@app.route('/dashboard', methods=['GET'])
+@app.route('/api/dashboard', methods=['GET'])
 @login_required
 def dashboard():
     return jsonify({"message": f"Hello {current_user.username}, welcome!"})
 
 
-@app.route('/logout', methods=['POST'])
+@app.route('/api/weather', methods=['GET'])  # <-- THE FIX
+@login_required
+def weather():
+    # This will now be called correctly
+    return api_calls.ApiCalls.get_current_weather().get('current_weather')
+
+
+@app.route('/api/meme', methods=['GET'])
+@login_required
+def meme():
+    # This will now be called correctly
+    return api_calls.ApiCalls.get_meme()
+
+@app.route('/api/stocks', methods=['GET'])
+@login_required
+def currency():
+    # This will now be called correctly
+    return api_calls.ApiCalls.get_currency()
+
+
+@app.route('/api/logout', methods=['POST'])
 @login_required
 def logout():
     logout_user()
     return jsonify({"message": "Logged out successfully"}), 200
 
+#@app.route('/api/moon_phase', methods=['GET'])
+#@login_required
+#def moon_phase():
+#    return api_calls.ApiCalls.get_moon_phase()
+
+
+@app.route('/api/news', methods=['GET'])
+@login_required
+def news():
+    query = request.args.get('query', 'technology')
+    country = request.args.get('country', 'hu')
+    language = request.args.get('language', 'en')
+    return api_calls.ApiCalls.get_latest_news(query=query, country=country, language=language)
+
+
+@app.route('/api/flights', methods=['GET'])
+@login_required
+def flights():
+    limit = request.args.get('limit', 10, type=int)
+    return api_calls.ApiCalls.get_flights_from_budapest(limit=limit)
+
+
+@app.route('/api/moon_phase', methods=['GET'])
+@login_required
+def moon_debrecen():
+    return api_calls.ApiCalls.get_moon_data_debrecen()
+
+
+@app.route('/api/popular_stocks', methods=['GET'])
+@login_required
+def popular_stocks():
+    symbols = request.args.getlist('symbols')
+    if not symbols:
+        symbols = None
+    return api_calls.ApiCalls.get_most_popular_stocks(symbols=symbols)
+
+
+# --- Main Execution (No changes) ---
 
 if __name__ == "__main__":
     try:
