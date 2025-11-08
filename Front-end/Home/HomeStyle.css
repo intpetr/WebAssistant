@@ -2,35 +2,33 @@
 
 /* Declaring colors as constants because of frequent use of them */
 :root {
-  --dark-green: hsl(170, 100%, 15%);
-  --white: hsl(177, 41%, 91%);
-  --black: hsl(0, 0%, 20%);
+        --dark-green: hsl(170, 100%, 15%);
+        --white: hsl(177, 41%, 91%);
+        --black: hsl(0, 0%, 20%);
 }
 
 body {
-  font-family: "Inter", sans-serif;
-  background-color: var(--white);
-  color: var(--dark-green);
+        font-family: "Inter", sans-serif;
+        background-color: var(--white);
+        color: var(--dark-green);
 }
 
 nav {
-  width: 100%;
-  border-bottom: 5px solid var(--black);
-  background-color: var(--dark-green);
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
+        width: 100%;
+        border-bottom: 5px solid var(--black);
+        background-color: var(--dark-green);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
 }
 
-.login-button,
-.setting-button,
-.calendar-button {
-  text-decoration: none;
-  border: 5px solid var(--white);
-  background-color: var(--white);
-  border-radius: 15px;
-  color: var(--dark-green);
-  display: inline-block;
-  padding: 10px 10px;
-  margin: 5px 5px;
+.movement-button {
+        text-decoration: none;
+        border: 5px solid var(--white);
+        background-color: var(--white);
+        border-radius: 15px;
+        color: var(--dark-green);
+        display: inline-block;
+        padding: 10px 10px;
+        margin: 5px 5px;
 }

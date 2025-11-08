@@ -1,39 +1,50 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Home</title>
-    <link rel="stylesheet" href="HomeStyle.css?v=1.1" />
-    <script
-      src="https://kit.fontawesome.com/9a9b8af8bd.js"
-      crossorigin="anonymous"
-    ></script>
-  </head>
-  <body>
-    <nav>
-      <div class="nav-left">
-        <a href="../Calendar/Calendar.html" class="calendar-button">Calendar</a>
-      </div>
-      <div class="nav-left">
-        <a
-          href="../Login/Login.html"
-          class="login-button"
-          id="login-register-btn"
-        >
-          Login / Register
-        </a>
-        <button onclick="windowChange()" class="setting-button">
-          <i class="fa-solid fa-gear"></i>
-        </button>
-      </div>
-    </nav>
-    <h1>Welcome to the home page</h1>
+        <head>
+                <meta charset="UTF-8" />
+                <meta
+                        name="viewport"
+                        content="width=device-width, initial-scale=1.0"
+                />
+                <title>Home</title>
+                <link rel="stylesheet" href="HomeStyle.css?v=1.1" />
+                <script
+                        src="https://kit.fontawesome.com/9a9b8af8bd.js"
+                        crossorigin="anonymous"
+                ></script>
+        </head>
+        <body>
+                <nav>
+                        <div class="nav-left">
+                                <a
+                                        href="../Calendar/Calendar.html"
+                                        class="movement-button"
+                                        >Calendar</a
+                                >
+                                <a
+                                        href="../Notes/Notes.html"
+                                        class="movement-button"
+                                        >Notes</a
+                                >
+                        </div>
+                        <div class="nav-left">
+                                <a
+                                        href="../Login/Login.html"
+                                        class="movement-button"
+                                        id="login-register-btn"
+                                >
+                                        Login / Register
+                                </a>
+                                <button
+                                        onclick="windowChange()"
+                                        class="movement-button"
+                                >
+                                        <i class="fa-solid fa-gear"></i>
+                                </button>
+                        </div>
+                </nav>
+                <h1>Welcome to the home page</h1>
 
-    <div>
-      <p>Calendar should go here</p>
-    </div>
-
-    <script src="Home.js?v=1.1"></script>
-  </body>
+                <script src="Home.js?v=1.1"></script>
+        </body>
 </html>
