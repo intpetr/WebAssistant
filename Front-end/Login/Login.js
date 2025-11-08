@@ -92,10 +92,10 @@ async function sendAuthRequest(endpoint, data, button) {
 
             if(response.ok){
                 // Successful login/registration
-                showMessage(result.message || `Success ${endpoint === '/login' ? 'Logged in' : 'Account Created'}`, 'success');
+                showMessage(result.message || `Success ${endpoint === '/api/login' ? 'Logged in' : 'Account Created'}`, 'success');
 
                 // FIX: Use the 'redirect' URL provided by the server
-                if (endpoint === '/login' && result.redirect) {
+                if (endpoint === '/api/login' && result.redirect) {
                     window.location.href = result.redirect;
                 } else if (endpoint === '/register') {
                     // Optionally switch to login view or redirect after successful registration
@@ -142,7 +142,7 @@ loginForm.addEventListener('submit', function(e){
     }
 
     const data = {username, password};
-    sendAuthRequest('/login', data, logInButton);
+    sendAuthRequest('/api/login', data, logInButton);
 });
 
 registerForm.addEventListener('submit', function(e) {
