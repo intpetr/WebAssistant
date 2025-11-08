@@ -66,3 +66,67 @@ function editNote(note) {
         saveNoteBtn.innerHTML =
                 '<i class="fa-solid fa-pencil"><i/> Update Note';
 }
+
+/* --Rendering and Search Logic-- */
+/* Rendering the list of notes into the DOM */
+function renderNotes(notesToRender) {
+        notesList.innerHTML = "";
+
+        if (notesToRender.length === 0) {
+                notesList.innerHTML =
+                        '<p class="initial-message">No notes found. Click "Add New Note" to get started <p/>';
+                return;
+        }
+
+        notesToRender.forEach((note) => {
+                const noteElement = document.createElement("div");
+                noteElement.className = "note-card";
+                noteElement.setAttribute("data-id", note.id);
+
+                const date = new Date(note.timestamp);
+                const formattedDate =
+                        date.toLocaleDateString() +
+                        " " +
+                        date.toLocaleTimeString([], {
+                                hour: "2-digit",
+                                minute: "2-digit",
+                        });
+
+                noteElement.innerHTML = `
+                        <h3 class="note-title">${
+                                note.title || "Untitled Note"
+                        }</h3>
+                        <p class="note-timestamp">Last updated: ${formattedDate}</p>
+                        <p class="note-content">${note.content.substring(
+                                0,
+                                200
+                        )}${note.content.length > 200 ? "..." : ""}</p>
+                        <div class="note-actions">
+                                <button class="edit-btn secondary-button" data-id="${
+                                        note.id
+                                }">
+                                <i class="fa-solid fa-pen"></i> Edit
+                                </button>
+                                <button class="delete-btn delete-button" data-id="${
+                                        note.id
+                                }">
+                                <i class="fa-solid fa-trash"></i> Delete
+                                </button>
+                        </div>
+                `;
+                notesList.appendChild(noteElement);
+        });
+}
+
+/* Filtering the globally stored notes based on the search input value */
+function filterNotes() {
+        const query = searchInput.value.toLoweCase();
+
+        const filteredNotes = allNotes.filter((note) => {
+                const title = (note.title || "").toLoweCase();
+                const content = (note.content || "").toLoweCase();
+                return title.includes(query) || content.includes(query);
+        });
+
+        renderNotes(filterNotes);
+}
