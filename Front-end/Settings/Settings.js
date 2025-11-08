@@ -1,7 +1,7 @@
 /* Configuration */
-import api from "../api";
-const SAVE_ENDPOINT = `${api}/settings`;
-const LOAD_ENDPOINT = `${api}/settings`;
+const API_BASE_URL = 'http://localhost:5000';
+const SAVE_ENDPOINT = `${API_BASE_URL}/api/settings`;
+const LOAD_ENDPOINT = `${API_BASE_URL}/api/settings`;
 
 /* DOM Element References */
 const settingsForm = document.getElementById("settings-form");

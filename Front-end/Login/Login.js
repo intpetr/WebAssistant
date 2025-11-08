@@ -84,22 +84,42 @@ async function sendAuthRequest(endpoint, data, button) {
       body: JSON.stringify(data),
     });
     const result = await response.json();
+            if(response.ok){
+                // Successful login/registration
+                showMessage(result.message || `Success ${endpoint === '/api/login' ? 'Logged in' : 'Account Created'}`, 'success');
 
-    if (response.ok) {
-      // Succesful login / registration
-      localStorage.setItem("isLoggedIn", "true");
-      showMessage(
-        result.message ||
-          `Success ${endpoint === "/login" ? "Logged in" : "Account created"}`,
-        "success"
-      );
+                // FIX: Use the 'redirect' URL provided by the server
+                if (endpoint === '/api/login' && result.redirect) {
+                    window.location.href = result.redirect;
+                } else if (endpoint === '/register') {
+                    // Optionally switch to login view or redirect after successful registration
+                    toggleAuthMode();
+                }
 
-      if (endpoint === "/login" && result.redirect) {
-        window.location.href = result.redirect;
-      } else if (endpoint === "/register") {
-        toggleAuthMode();
-      }
-      return; // Success, exit function
+                setButtonLoadingState(button, false, originalText);
+                return; // Exiting successfully
+            }
+
+            // Handling HTTP error responses
+            const errorMessage = result.error || `Server Error: ${response.statusText}`;
+
+            showMessage(errorMessage);
+            setButtonLoadingState(button, false, originalText);
+            return; // Exiting after processing server error
+        }
+        catch(error){
+            console.error('Fetch error: ', error);
+
+            // Retrying if it's a network related error
+            if(attempt < MAX_TRIES - 1){
+                const delay = Math.pow(2, attempt) * 1000;
+                await new Promise(resolve => setTimeout(resolve, delay));
+            }
+            else{
+                showMessage(`Network error: Could not connect to the server at ${API_BASE_URL}. Check if backend is running`);
+                setButtonLoadingState(button, false, originalText);
+            }
+        }
     }
 
     // Server returned an error
@@ -128,8 +148,8 @@ loginForm.addEventListener("submit", function (e) {
     return showMessage("Please fill in both the username and the password");
   }
 
-  const data = { username, password };
-  sendAuthRequest("/login", data, logInButton);
+    const data = {username, password};
+    sendAuthRequest('/api/login', data, logInButton);
 });
 
 registerForm.addEventListener("submit", function (e) {
