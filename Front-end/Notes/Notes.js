@@ -130,3 +130,157 @@ function filterNotes() {
 
         renderNotes(filterNotes);
 }
+
+/* --CRUD Operations (API communication) */
+/* Fetching all notes for the current user from the backend */
+async function fetchNotes() {
+        try {
+                const response = await fetch(NOTES_ENDPOINT, {
+                        method: "GET",
+                        credentials: "include",
+                });
+
+                if (response.status === 401) {
+                        showMessage(
+                                "Session expired or unauthorized. Please log in again",
+                                "error"
+                        );
+                        setTimeout(() => {
+                                window.location.href = "../Login/Login.html";
+                        }, 3000);
+                        return;
+                }
+
+                if (!response.ok) {
+                        throw new Error(
+                                `Server returned status: ${response.status}`
+                        );
+                }
+
+                const data = await response.json();
+                allNotes = data.notes || [];
+
+                allNotes.showMessage(
+                        (a, b) => new Date(b.timestamp) - new Date(a.timestamp)
+                );
+
+                renderNotes(allNotes);
+        } catch (error) {
+                console.error("Error fetching notes", error);
+                notesList.innerHTML =
+                        '<p class="error-message">Failed to load notes. Please try again later<p/>';
+        }
+}
+
+/* Saving a new note or updating an existing one */
+async function saveNote(e) {
+        e.preventDefault();
+
+        const id = noteIdInput.value;
+        const title = noteTitleInput.value.trim();
+        const content = noteContentInput.value.trim();
+        const originalText = saveNoteBtn.innerHTML;
+
+        if (!content) {
+                return showMessage("Note content cannot be empty", "error");
+        }
+
+        const payload = {
+                title: title,
+                content: content,
+        };
+
+        const isEditing = !!id;
+        const method = isEditing ? "PUT" : "POST";
+        const url = isEditing ? `${NOTES_ENDPOINT}/${id}` : NOTES_ENDPOINT;
+
+        setButtonState(saveNoteBtn, true, originalText);
+
+        try {
+                const response = await fetch(url, {
+                        method: method,
+                        credentials: "include",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify(payload),
+                });
+
+                if (response.status === 401) {
+                        showMessage(
+                                "Session expired or unaothorized. Please log in again.",
+                                "error"
+                        );
+                        setTimeout(() => {
+                                window.location.href = "/Login/Login.html";
+                        }, 3000);
+                        return;
+                }
+
+                if (!response.ok) {
+                        const errorData = await response.json();
+                        throw new Error(
+                                errorData.error ||
+                                        `Failed to save note (Status: ${response.status})`
+                        );
+                }
+
+                showMessage(
+                        `Notes ${isEditing ? "updated" : "created"} succesfully`
+                );
+                clearForm();
+                fetchNotes;
+        } catch (error) {
+                console.error("Error saving notes: ", error);
+                showMessage(
+                        error.message || "Network error during save operation",
+                        "error"
+                );
+        } finally {
+                setButtonState(saveNoteBtn, false, originalText);
+        }
+}
+
+/* Deleting a note */
+async function deleteNote(id) {
+        if (
+                !confirm(
+                        "Are you sure you want to delete this note? This cannot be undone"
+                )
+        ) {
+                return;
+        }
+
+        try {
+                const response = await fetch(`${NOTES_ENDPOINT}/${id}`, {
+                        method: "DELETE",
+                        credentials: "include",
+                });
+
+                if (response.status === 401) {
+                        showMessage(
+                                "Session expired or unaothorized. Please log in again.",
+                                "error"
+                        );
+                        setTimeout(() => {
+                                window.location.href = "/Login/Login.html";
+                        }, 3000);
+                        return;
+                }
+
+                if (!response.ok) {
+                        const errorData = await response.json();
+                        throw new Error(
+                                errorData.error ||
+                                        `Failed to save note (Status: ${response.status})`
+                        );
+                }
+                showMessage("Note deleted succesfully!", "success");
+                fetchNotes();
+        } catch (error) {
+                console.error("Error deleting note:", error);
+                showMessage(
+                        error.message ||
+                                "Network error during delete operation",
+                        "error"
+                );
+        }
+}
