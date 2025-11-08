@@ -284,3 +284,48 @@ async function deleteNote(id) {
                 );
         }
 }
+
+/* --Event listeners and initialization */
+document.addEventListener("DOMContentLoaded", () => {
+        // Initial data load
+        fetchNotes();
+
+        // Form submission handler
+        noteForm.addEventListener("submit", saveNote);
+
+        // Search handler
+        let searchTimeout;
+        searchInput.addEventListener("input", () => {
+                clearTimeout(searchTimeout);
+                searchTimeout = setTimeout(filterNotes, 300);
+        });
+
+        // Toggle New Note Form
+        newNoteToggleBtn.addEventListener("click", () => {
+                noteForm.classList.remove("hidden");
+                clearForm();
+                saveNoteBtn.innerHTML =
+                        '<i class="fa-solid fa-floppy-disk"></i> Save Note';
+        });
+
+        // Cancel Edit/Creation
+        cancelEditBtn.addEventListener("click", clearForm);
+
+        notesList.addEventListener("click", (e) => {
+                const targetButton = e.target.closest("[data-id]");
+                if (!targetButton) return;
+
+                const id = targetButton.getAttribute("data-id");
+
+                if (targetButton.classList.confirm("edit-btn")) {
+                        const noteToEdit = allNotes.find((n) => n.id == id);
+                        if (noteToEdit) {
+                                editNote(noteToEdit);
+                        }
+                }
+
+                if (targetButton.classList.contains("delete-btn")) {
+                        deleteNote(id);
+                }
+        });
+});
