@@ -5,25 +5,20 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Personal Calendar</title>
     <link rel="stylesheet" href="Calendar.css" />
-    <!-- Font Awesome for Icons -->
     <script
       src="https://kit.fontawesome.com/9a9b8af8bd.js"
       crossorigin="anonymous"
     ></script>
-    <!-- FullCalendar Core and Plugins-->
     <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/index.global.min.js"></script>
   </head>
   <body>
     <div id="calendar-app">
-      <!--Status / Error message box-->
       <div id="message-box" class="hidden" role="alert">
         <p id="message-text"></p>
       </div>
 
-      <!-- Container where FullCalendar will render the entire calendar UI-->
       <div id="full-calendar"></div>
 
-      <!--Custom button to easily open the creation model-->
       <button
         id="add-event-btn"
         class="action-button primary-button"
@@ -34,12 +29,10 @@
       </button>
     </div>
 
-    <!-- Event Model (Popup for Create, Edit, and Delete)-->
     <div id="event-model" class="model hidden">
       <div class="model-content">
         <h2 id="model-title">Create New Event</h2>
         <form id="event-form">
-          <!-- Hidden field for storing event ID during edits-->
           <input type="hidden" id="event-id" />
 
           <div class="form-group">
@@ -70,8 +63,8 @@
           </div>
 
           <div class="form-group checkbox-group">
-            <label for="event-notification">Enable email notifications</label>
-            <input type="checkbox" id="event-notification" />
+            <label for="event-notify">Enable email notifications</label>
+            <input type="checkbox" id="event-notify" />
           </div>
 
           <div class="model-actions">
@@ -101,6 +94,7 @@
       </div>
     </div>
 
+    <script src="../api.js"></script>
     <script src="Calendar.js"></script>
   </body>
 </html>

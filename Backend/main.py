@@ -1,10 +1,12 @@
+from datetime import datetime, time
+
 from flask import Flask, request, jsonify, send_from_directory, redirect, url_for
 from flask_sqlalchemy import SQLAlchemy
 import logging
 import os
 from flask_cors import CORS
 from Models import User, db
-
+from Models import Event
 from flask_login import LoginManager, login_user, login_required, logout_user, current_user
 
 import api_calls
@@ -65,6 +67,18 @@ def login_page():
     if current_user.is_authenticated:
         return redirect(url_for('home_page'))
     return send_from_directory(app.static_folder, 'Login/Login.html')
+
+
+@app.route('/Notes/')
+@login_required
+def notes_page():
+    return send_from_directory(app.static_folder, 'Notes/Notes.html')
+
+
+@app.route('/Calendar/')
+@login_required
+def calendar_page():
+    return send_from_directory(app.static_folder, 'Calendar/Calendar.html')
 
 
 @app.route('/Settings/')
@@ -145,6 +159,90 @@ def settings():
         return jsonify({"message": "Settings updated successfully"})
 
 
+# In main.py, find @app.route('/api/events', ...) and REPLACE it with this:
+
+
+def combine_date_time(date_str, time_str):
+    """
+    Combines a 'YYYY-MM-DD' date string and 'HH:MM' time string
+    into a timezone-aware datetime object (assuming local timezone).
+    Returns None if inputs are invalid or missing.
+    """
+    if not date_str or not time_str:
+        return None
+    try:
+        date_obj = datetime.fromisoformat(date_str).date()
+        time_obj = time.fromisoformat(time_str)
+        # Create naive datetime
+        dt = datetime.combine(date_obj, time_obj)
+        # Return timezone-aware datetime (attaches local timezone)
+        return dt.astimezone()
+    except (ValueError, TypeError):
+        return None
+
+
+
+@app.route('/api/calendar', methods=['GET', 'POST'])
+@login_required
+def manage_events():
+    """
+    GET: Gets all events for the current user.
+    POST: Creates a new event for the current user.
+    """
+
+    if request.method == 'GET':
+        try:
+            events_query = current_user.events
+            events = events_query.order_by(Event.start_time.asc()).all()
+            events_list = [event.to_dict() for event in events]
+
+            # Return a dictionary with an "events" key, as the JS expects
+            return jsonify({"events": events_list}), 200
+
+        except Exception as e:
+            app.logger.error(f"Error fetching events for user {current_user.id}: {e}")
+            return jsonify({"error": "An error occurred while retrieving events."}), 500
+
+    if request.method == 'POST':
+        data = request.get_json()
+
+        # Validate data coming from the JS form
+        if not data or not data.get('title') or not data.get('date') or not data.get('startTime'):
+            return jsonify({"error": "Title, Date, and Start Time are required."}), 400
+
+        try:
+            # Combine date and time strings from JSON
+            start_dt = combine_date_time(data['date'], data['startTime'])
+            end_dt = combine_date_time(data['date'], data.get('endTime'))  # endTime is optional
+
+            if start_dt is None:
+                return jsonify({"error": "Invalid date or start time format. Use YYYY-MM-DD and HH:MM."}), 400
+
+            new_event = Event(
+                title=data['title'],
+                description=data.get('description'),
+                start_time=start_dt,
+                end_time=end_dt,  # Will be None if not provided, which is fine
+                notify=data.get('notify', False),
+                user_id=current_user.id
+            )
+
+            db.session.add(new_event)
+            db.session.commit()
+
+            # Return the newly created event in the new format
+            return jsonify(new_event.to_dict()), 201
+
+        except Exception as e:
+            app.logger.error(f"Error creating event for user {current_user.id}: {e}")
+            db.session.rollback()
+            return jsonify({"error": "An error occurred while creating the event."}), 500
+
+
+# 2. ADD THIS HELPER FUNCTION near your imports
+
+
+
 @app.route('/api/dashboard', methods=['GET'])
 @login_required
 def dashboard():
@@ -164,6 +262,7 @@ def meme():
     # This will now be called correctly
     return api_calls.ApiCalls.get_meme()
 
+
 @app.route('/api/stocks', methods=['GET'])
 @login_required
 def currency():
@@ -177,9 +276,10 @@ def logout():
     logout_user()
     return jsonify({"message": "Logged out successfully"}), 200
 
-#@app.route('/api/moon_phase', methods=['GET'])
-#@login_required
-#def moon_phase():
+
+# @app.route('/api/moon_phase', methods=['GET'])
+# @login_required
+# def moon_phase():
 #    return api_calls.ApiCalls.get_moon_phase()
 
 

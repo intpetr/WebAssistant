@@ -1,5 +1,5 @@
-import api from "../api";
-const DASHBOARD_ENDPOINT = `${api}/dashboard`;
+import api from "../api.js";
+const DASHBOARD_ENDPOINT = `${api}/api/dashboard`;
 
 // Function to handle navigation to the settings page
 function windowChange() {

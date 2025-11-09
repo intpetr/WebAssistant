@@ -4,6 +4,7 @@ from sqlalchemy.dialects.postgresql import JSON
 
 db = SQLAlchemy()
 
+
 class User(db.Model, UserMixin):
     __tablename__ = 'users'
 
@@ -12,10 +13,15 @@ class User(db.Model, UserMixin):
     password = db.Column(db.String(30), nullable=False)
     email = db.Column(db.String(50))  # ← new column added here
 
+    events = db.relationship(
+        'Event',
+        back_populates='user',
+        lazy='dynamic',
+        cascade='all, delete-orphan'
+    )
     @staticmethod
     def get_by_username(username):
         return User.query.filter_by(username=username).first()
-
 
 
 class UserSettings(db.Model):
@@ -29,3 +35,54 @@ class UserSettings(db.Model):
         'User',
         backref=db.backref('settings', uselist=False)
     )
+
+
+class Event(db.Model):
+    __tablename__ = 'events'
+
+    event_id = db.Column(db.Integer, primary_key=True)
+
+    # These are required by your JS form
+    title = db.Column(db.String(255), nullable=False)
+    start_time = db.Column(db.DateTime(timezone=True), nullable=False)
+
+    # These are optional
+    description = db.Column(db.Text, nullable=True)
+    notify = db.Column(db.Boolean, nullable=False, default=False)
+    end_time = db.Column(db.DateTime(timezone=True), nullable=True)
+
+    user_id = db.Column(
+        db.Integer,
+        db.ForeignKey('users.id', ondelete='CASCADE'),
+        nullable=False
+    )
+
+    user = db.relationship('User', back_populates='events')
+
+    def to_dict(self):
+        """
+        Converts the event object to a serializable dictionary
+        matching the JavaScript frontend's expectations.
+        """
+
+        # Split start_time into date and time
+        event_date = self.start_time.strftime('%Y-%m-%d')
+        start_time_str = self.start_time.strftime('%H:%M')
+
+        # Split end_time, but only if it exists
+        end_time_str = None
+        if self.end_time:
+            end_time_str = self.end_time.strftime('%H:%M')
+
+        return {
+            'id': self.event_id,  # JS expects 'id', not 'event_id'
+            'title': self.title,
+            'description': self.description,
+            'notify': self.notify,
+            'date': event_date,  # JS expects 'date'
+            'startTime': start_time_str,  # JS expects 'startTime'
+            'endTime': end_time_str  # JS expects 'endTime'
+        }
+
+    def __repr__(self):
+        return f'<Event {self.event_id}: {self.title}>'

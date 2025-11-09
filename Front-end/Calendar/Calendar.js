@@ -1,4 +1,5 @@
-import api from "../api";
+// The 'api' variable is now loaded globally from Calendar.html
+// The 'import' line has been removed.
 
 const API_BASE_URL = api;
 let calendar;
@@ -21,12 +22,12 @@ const dateInput = document.getElementById("event-date");
 const startTimeInput = document.getElementById("event-start-time");
 const endTimeInput = document.getElementById("event-end-time");
 const descriptionInput = document.getElementById("event-description");
-const notifyCheckbox = document.getElementById("event-notify");
+const notifyCheckbox = document.getElementById("event-notify"); // This ID now matches the HTML
 
 /* --Utility functions consistent with other files-- */
 /* Status message */
 function showMessage(message, type = "error") {
-  messageBox.classList.remove("message-success", "message-error ", "hidden");
+  messageBox.classList.remove("message-success", "message-error", "hidden");
 
   if (type === "success") {
     messageBox.classList.add("message-success");
@@ -115,7 +116,7 @@ async function saveEvent(e) {
 
   const payload = getEventPayload();
 
-  if (!payload.title || payload.date || payload.startTime) {
+  if (!payload.title || !payload.date || !payload.startTime) {
     return showMessage("Title, Date and Start Time are required", "error");
   }
 
@@ -147,7 +148,7 @@ async function saveEvent(e) {
         "error"
       );
       setTimeout(() => {
-        window.location.href = "../Login/Login.html";
+        window.location.href = "/Login/";
       }, 5000);
     } else {
       const errorResult = await response.json();
@@ -190,7 +191,7 @@ async function deleteEvent() {
         "error"
       );
       setTimeout(() => {
-        window.location.href = "../Login/Login.html";
+        window.location.href = "/Login/";
       }, 5000);
     } else {
       const errorResult = await response.json();
@@ -222,12 +223,12 @@ async function fetchEvents(fetchInfo, successCallback, failureCallback) {
           "error"
         );
         setTimeout(() => {
-          window.location.href = "../Login/Login.html";
+          window.location.href = "/Login/";
         }, 5000);
       }
       const errorResult = await response.json();
       console.error("Failed to fetch events: ", errorResult.error);
-      showMessage("Failed to lead events.", "error");
+      showMessage("Failed to load events.", "error");
       failureCallback(new Error(errorResult.error));
       return;
     }
@@ -239,7 +240,8 @@ async function fetchEvents(fetchInfo, successCallback, failureCallback) {
       id: e.id,
       title: e.title,
       start: `${e.date}T${e.startTime}`,
-      end: `${e.date}T${e.endTime}`,
+      // Only add end time if it exists
+      end: e.endTime ? `${e.date}T${e.endTime}` : null,
       extendedProps: {
         description: e.description,
         notify: e.notify,
@@ -270,7 +272,7 @@ async function handleEventChange(info) {
     minute: "2-digit",
   });
 
-  let newEndTime = newStartTime;
+  let newEndTime = null; // Default to null if no end time
   if (event.end) {
     newEndTime = event.end.toLocaleTimeString("en-US", {
       hour12: false,
@@ -285,7 +287,7 @@ async function handleEventChange(info) {
     title: event.title,
     date: newDate,
     startTime: newStartTime,
-    endTime: newEndTime,
+    endTime: newEndTime, // Send null if there's no end time
     description: event.extendedProps.description,
     notify: event.extendedProps.notify,
   };
@@ -333,7 +335,7 @@ async function handleEventChange(info) {
 document.addEventListener("DOMContentLoaded", function () {
   // Initialize FullCalendar
   calendar = new FullCalendar.Calendar(calendarE1, {
-    plugins: ["dayGrid", "timeGrid", "interaction"],
+    // plugins array is completely removed
     initialView: "dayGridMonth",
     headerToolbar: {
       left: "prev, next today",
@@ -353,6 +355,8 @@ document.addEventListener("DOMContentLoaded", function () {
         title: info.event.title,
         date: info.event.extendedProps.date,
         startTime: info.event.extendedProps.startTime,
+        // --- THIS IS THE FIX ---
+        // Changed 'info.C' to 'info.event'
         endTime: info.event.extendedProps.endTime,
         description: info.event.extendedProps.description,
         notify: info.event.extendedProps.notify,

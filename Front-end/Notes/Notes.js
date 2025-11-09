@@ -1,5 +1,5 @@
 /* API Configuration */
-import api from "../api";
+import api from "../api.js";
 const NOTES_ENDPOINT = `${api}/api/notes`;
 
 /* DOM Element References */
@@ -146,7 +146,7 @@ async function fetchNotes() {
                                 "error"
                         );
                         setTimeout(() => {
-                                window.location.href = "../Login/Login.html";
+                                window.location.href = "/Login/";
                         }, 3000);
                         return;
                 }
@@ -210,7 +210,7 @@ async function saveNote(e) {
                                 "error"
                         );
                         setTimeout(() => {
-                                window.location.href = "/Login/Login.html";
+                                window.location.href = "/Login/";
                         }, 3000);
                         return;
                 }
@@ -261,7 +261,7 @@ async function deleteNote(id) {
                                 "error"
                         );
                         setTimeout(() => {
-                                window.location.href = "/Login/Login.html";
+                                window.location.href = "/Login/";
                         }, 3000);
                         return;
                 }
