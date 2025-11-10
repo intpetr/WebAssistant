@@ -1,7 +1,7 @@
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import UserMixin
 from sqlalchemy.dialects.postgresql import JSON
-
+from sqlalchemy.sql import func
 db = SQLAlchemy()
 
 
@@ -15,6 +15,13 @@ class User(db.Model, UserMixin):
 
     events = db.relationship(
         'Event',
+        back_populates='user',
+        lazy='dynamic',
+        cascade='all, delete-orphan'
+    )
+
+    notes = db.relationship(
+        'Note',
         back_populates='user',
         lazy='dynamic',
         cascade='all, delete-orphan'
@@ -86,3 +93,41 @@ class Event(db.Model):
 
     def __repr__(self):
         return f'<Event {self.event_id}: {self.title}>'
+
+
+class Note(db.Model):
+    __tablename__ = 'notes'
+
+    note_id = db.Column(db.Integer, primary_key=True)
+    title = db.Column(db.String(255), nullable=True)
+    content = db.Column(db.Text, nullable=False)
+
+    # This timestamp will automatically update on creation and on update
+    timestamp = db.Column(
+        db.DateTime(timezone=True),
+        server_default=func.now(),
+        onupdate=func.now()
+    )
+
+    user_id = db.Column(
+        db.Integer,
+        db.ForeignKey('users.id', ondelete='CASCADE'),
+        nullable=False
+    )
+
+    user = db.relationship('User', back_populates='notes')
+
+    def to_dict(self):
+        """
+        Converts the note object to a serializable dictionary
+        matching the JavaScript frontend's expectations.
+        """
+        return {
+            'id': self.note_id,
+            'title': self.title,
+            'content': self.content,
+            'timestamp': self.timestamp.isoformat()  # JS 'new Date()' can parse ISO format
+        }
+
+    def __repr__(self):
+        return f'<Note {self.note_id}: {self.title}>'

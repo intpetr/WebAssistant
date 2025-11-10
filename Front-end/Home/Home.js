@@ -1,4 +1,4 @@
-import api from "../api.js";
+//import api from "../api.js";
 const DASHBOARD_ENDPOINT = `${api}/api/dashboard`;
 
 // Function to handle navigation to the settings page

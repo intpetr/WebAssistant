@@ -1,5 +1,4 @@
 from datetime import datetime, time
-
 from flask import Flask, request, jsonify, send_from_directory, redirect, url_for
 from flask_sqlalchemy import SQLAlchemy
 import logging
@@ -8,7 +7,7 @@ from flask_cors import CORS
 from Models import User, db
 from Models import Event
 from flask_login import LoginManager, login_user, login_required, logout_user, current_user
-
+from Models import Note
 import api_calls
 
 BASE_DIR = os.path.abspath(os.path.dirname(__file__))
@@ -17,7 +16,7 @@ CREDENTIALS_FILE = os.path.join(BASE_DIR, 'credentials.txt')
 
 app = Flask(__name__,
             static_folder=FRONTEND_DIR,
-            static_url_path='')  # This remains, to serve your HTML pages from root
+            static_url_path='')
 
 CORS(app, supports_credentials=True,
      origins=["http://localhost:5000", "http://127.0.0.1:5000", "http://127.0.0.1:5500"])
@@ -27,7 +26,6 @@ app.secret_key = "supersecretkey"
 login_manager = LoginManager()
 login_manager.init_app(app)
 
-# This remains 'login_page' - it's the *route name* for the HTML login page
 login_manager.login_view = 'login_page'
 
 
@@ -38,20 +36,16 @@ def load_user(user_id):
 
 @login_manager.unauthorized_handler
 def unauthorized():
-    # UPDATED: Check if the request is for an API endpoint
-    # If so, return a JSON 401 error, which is much better for fetch() calls
     if request.path.startswith('/api/'):
         return jsonify({"error": "Unauthorized"}), 401
 
-    # Otherwise, it's a page request, so redirect to the login page
     return redirect(url_for('login_page'))
 
-
-# --- Page Serving Routes (No changes) ---
 
 @app.route('/')
 def index():
     if current_user.is_authenticated:
+
         return redirect(url_for('home_page'))
     return redirect(url_for('login_page'))
 
@@ -65,7 +59,8 @@ def home_page():
 @app.route('/Login/')
 def login_page():
     if current_user.is_authenticated:
-        return redirect(url_for('home_page'))
+        pass
+        #return redirect(url_for('home_page'))
     return send_from_directory(app.static_folder, 'Login/Login.html')
 
 
@@ -86,8 +81,6 @@ def calendar_page():
 def settings_page():
     return send_from_directory(app.static_folder, 'Settings/Settings.html')
 
-
-# --- API Endpoints (Prefix added) ---
 
 @app.route('/api/register', methods=['POST'])
 def register():
@@ -124,7 +117,6 @@ def login():
 
     return jsonify({
         "message": "Login successful",
-        # The redirect URL remains a page route
         "redirect": url_for('home_page')
     })
 
@@ -159,44 +151,125 @@ def settings():
         return jsonify({"message": "Settings updated successfully"})
 
 
-# In main.py, find @app.route('/api/events', ...) and REPLACE it with this:
-
-
 def combine_date_time(date_str, time_str):
-    """
-    Combines a 'YYYY-MM-DD' date string and 'HH:MM' time string
-    into a timezone-aware datetime object (assuming local timezone).
-    Returns None if inputs are invalid or missing.
-    """
     if not date_str or not time_str:
         return None
     try:
         date_obj = datetime.fromisoformat(date_str).date()
         time_obj = time.fromisoformat(time_str)
-        # Create naive datetime
         dt = datetime.combine(date_obj, time_obj)
-        # Return timezone-aware datetime (attaches local timezone)
         return dt.astimezone()
     except (ValueError, TypeError):
         return None
 
 
+@app.route('/api/notes', methods=['GET'])
+@login_required
+def get_notes():
+    try:
+
+        notes_query = current_user.notes.order_by(Note.timestamp.desc())
+        notes = notes_query.all()
+        notes_list = [note.to_dict() for note in notes]
+
+        return jsonify({"notes": notes_list}), 200
+
+    except Exception as e:
+        app.logger.error(f"Error fetching notes for user {current_user.id}: {e}")
+        return jsonify({"error": "An error occurred while retrieving notes."}), 500
+
+
+@app.route('/api/notes', methods=['POST'])
+@login_required
+def create_note():
+    data = request.get_json()
+    title = data.get('title')
+    content = data.get('content')
+
+    if not content:
+        return jsonify({"error": "Note content cannot be empty"}), 400
+
+    try:
+        new_note = Note(
+            title=title,
+            content=content,
+            user_id=current_user.id
+        )
+        db.session.add(new_note)
+        db.session.commit()
+
+        return jsonify(new_note.to_dict()), 201
+
+    except Exception as e:
+        app.logger.error(f"Error creating note for user {current_user.id}: {e}")
+        db.session.rollback()
+        return jsonify({"error": "An error occurred while creating the note."}), 500
+
+
+@app.route('/api/notes/<int:note_id>', methods=['PUT'])
+@login_required
+def update_note(note_id):
+    try:
+        note = db.session.get(Note, note_id)
+
+        if not note:
+            return jsonify({"error": "Note not found"}), 404
+
+        if note.user_id != current_user.id:
+            return jsonify({"error": "Unauthorized to edit this note"}), 403
+
+        data = request.get_json()
+        content = data.get('content')
+
+        if not content:
+            return jsonify({"error": "Note content cannot be empty"}), 400
+
+        note.title = data.get('title')
+        note.content = content
+
+        db.session.commit()
+
+        return jsonify(note.to_dict()), 200
+
+    except Exception as e:
+        app.logger.error(f"Error updating note {note_id} for user {current_user.id}: {e}")
+        db.session.rollback()
+        return jsonify({"error": "An error occurred while updating the note."}), 500
+
+
+@app.route('/api/notes/<int:note_id>', methods=['DELETE'])
+@login_required
+def delete_note(note_id):
+
+    try:
+        note = db.session.get(Note, note_id)
+
+        if not note:
+            return jsonify({"error": "Note not found"}), 404
+
+        if note.user_id != current_user.id:
+            return jsonify({"error": "Unauthorized to delete this note"}), 403
+
+        db.session.delete(note)
+        db.session.commit()
+
+        return jsonify({"message": "Note deleted successfully!"}), 200
+
+    except Exception as e:
+        app.logger.error(f"Error deleting note {note_id} for user {current_user.id}: {e}")
+        db.session.rollback()
+        return jsonify({"error": "An error occurred while deleting the note."}), 500
+
 
 @app.route('/api/calendar', methods=['GET', 'POST'])
 @login_required
 def manage_events():
-    """
-    GET: Gets all events for the current user.
-    POST: Creates a new event for the current user.
-    """
-
     if request.method == 'GET':
         try:
             events_query = current_user.events
             events = events_query.order_by(Event.start_time.asc()).all()
             events_list = [event.to_dict() for event in events]
 
-            # Return a dictionary with an "events" key, as the JS expects
             return jsonify({"events": events_list}), 200
 
         except Exception as e:
@@ -206,14 +279,13 @@ def manage_events():
     if request.method == 'POST':
         data = request.get_json()
 
-        # Validate data coming from the JS form
         if not data or not data.get('title') or not data.get('date') or not data.get('startTime'):
             return jsonify({"error": "Title, Date, and Start Time are required."}), 400
 
         try:
-            # Combine date and time strings from JSON
+
             start_dt = combine_date_time(data['date'], data['startTime'])
-            end_dt = combine_date_time(data['date'], data.get('endTime'))  # endTime is optional
+            end_dt = combine_date_time(data['date'], data.get('endTime'))
 
             if start_dt is None:
                 return jsonify({"error": "Invalid date or start time format. Use YYYY-MM-DD and HH:MM."}), 400
@@ -222,7 +294,7 @@ def manage_events():
                 title=data['title'],
                 description=data.get('description'),
                 start_time=start_dt,
-                end_time=end_dt,  # Will be None if not provided, which is fine
+                end_time=end_dt,
                 notify=data.get('notify', False),
                 user_id=current_user.id
             )
@@ -230,17 +302,12 @@ def manage_events():
             db.session.add(new_event)
             db.session.commit()
 
-            # Return the newly created event in the new format
             return jsonify(new_event.to_dict()), 201
 
         except Exception as e:
             app.logger.error(f"Error creating event for user {current_user.id}: {e}")
             db.session.rollback()
             return jsonify({"error": "An error occurred while creating the event."}), 500
-
-
-# 2. ADD THIS HELPER FUNCTION near your imports
-
 
 
 @app.route('/api/dashboard', methods=['GET'])

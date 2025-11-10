@@ -1,5 +1,7 @@
 /* API Configuration */
-import api from "../api.js";
+// *** MODIFICATION ***
+// Removed: import api from "../api.js";
+// 'api' is now a global variable from api.js (loaded in HTML)
 const NOTES_ENDPOINT = `${api}/api/notes`;
 
 /* DOM Element References */
@@ -39,8 +41,10 @@ function showMessage(message, type = "error") {
 function setButtonState(button, isLoading, originalText) {
         if (isLoading) {
                 button.disabled = true;
+                // *** MODIFICATION (BUG FIX) ***
+                // Fixed self-closing <span/> to </span>
                 button.innerHTML =
-                        '<span class="loading-spinner"><span/> Saving...';
+                        '<span class="loading-spinner"></span> Saving...';
         } else {
                 button.disabled = false;
                 button.innerHTML = originalText;
@@ -53,7 +57,7 @@ function clearForm() {
         noteIdInput.value = "";
         noteForm.classList.add("hidden");
         saveNoteBtn.innerHTML =
-                '<i class="fa-solid fa-floppy-disk"><i/> Save Note';
+                '<i class="fa-solid fa-floppy-disk"></i> Save Note';
 }
 
 /* Populating the form with existing note date for editing */
@@ -64,7 +68,7 @@ function editNote(note) {
 
         noteForm.classList.remove("hidden");
         saveNoteBtn.innerHTML =
-                '<i class="fa-solid fa-pencil"><i/> Update Note';
+                '<i class="fa-solid fa-pencil"></i> Update Note';
 }
 
 /* --Rendering and Search Logic-- */
@@ -74,7 +78,7 @@ function renderNotes(notesToRender) {
 
         if (notesToRender.length === 0) {
                 notesList.innerHTML =
-                        '<p class="initial-message">No notes found. Click "Add New Note" to get started <p/>';
+                        '<p class="initial-message">No notes found. Click "Add New Note" to get started</p>';
                 return;
         }
 
@@ -120,15 +124,21 @@ function renderNotes(notesToRender) {
 
 /* Filtering the globally stored notes based on the search input value */
 function filterNotes() {
-        const query = searchInput.value.toLoweCase();
+        // *** MODIFICATION (BUG FIX) ***
+        // Fixed typo 'toLoweCase' to 'toLowerCase'
+        const query = searchInput.value.toLowerCase();
 
         const filteredNotes = allNotes.filter((note) => {
-                const title = (note.title || "").toLoweCase();
-                const content = (note.content || "").toLoweCase();
+                // *** MODIFICATION (BUG FIX) ***
+                // Fixed typo 'toLoweCase' to 'toLowerCase'
+                const title = (note.title || "").toLowerCase();
+                const content = (note.content || "").toLowerCase();
                 return title.includes(query) || content.includes(query);
         });
 
-        renderNotes(filterNotes);
+        // *** MODIFICATION (BUG FIX) ***
+        // Fixed logic 'filterNotes' to 'filteredNotes'
+        renderNotes(filteredNotes);
 }
 
 /* --CRUD Operations (API communication) */
@@ -160,7 +170,9 @@ async function fetchNotes() {
                 const data = await response.json();
                 allNotes = data.notes || [];
 
-                allNotes.showMessage(
+                // *** MODIFICATION (BUG FIX) ***
+                // Fixed typo 'showMessage' to 'sort'
+                allNotes.sort(
                         (a, b) => new Date(b.timestamp) - new Date(a.timestamp)
                 );
 
@@ -168,7 +180,7 @@ async function fetchNotes() {
         } catch (error) {
                 console.error("Error fetching notes", error);
                 notesList.innerHTML =
-                        '<p class="error-message">Failed to load notes. Please try again later<p/>';
+                        '<p class="error-message">Failed to load notes. Please try again later</p>';
         }
 }
 
@@ -206,7 +218,7 @@ async function saveNote(e) {
 
                 if (response.status === 401) {
                         showMessage(
-                                "Session expired or unaothorized. Please log in again.",
+                                "Session expired or unauthorized. Please log in again.",
                                 "error"
                         );
                         setTimeout(() => {
@@ -224,10 +236,14 @@ async function saveNote(e) {
                 }
 
                 showMessage(
-                        `Notes ${isEditing ? "updated" : "created"} succesfully`
+                        `Note ${isEditing ? "updated" : "created"} successfully`,
+                        "success" // <-- Also added 'success' type
                 );
                 clearForm();
-                fetchNotes;
+                
+                // *** MODIFICATION (BUG FIX) ***
+                // Added parentheses to call the function
+                fetchNotes();
         } catch (error) {
                 console.error("Error saving notes: ", error);
                 showMessage(
@@ -257,7 +273,7 @@ async function deleteNote(id) {
 
                 if (response.status === 401) {
                         showMessage(
-                                "Session expired or unaothorized. Please log in again.",
+                                "Session expired or unauthorized. Please log in again.",
                                 "error"
                         );
                         setTimeout(() => {
@@ -273,7 +289,7 @@ async function deleteNote(id) {
                                         `Failed to save note (Status: ${response.status})`
                         );
                 }
-                showMessage("Note deleted succesfully!", "success");
+                showMessage("Note deleted successfully!", "success");
                 fetchNotes();
         } catch (error) {
                 console.error("Error deleting note:", error);
@@ -301,9 +317,13 @@ document.addEventListener("DOMContentLoaded", () => {
         });
 
         // Toggle New Note Form
+        // *** MODIFICATION (BUG FIX) ***
+        // Replaced 'clearForm()' which hides the form,
+        // with a manual reset.
         newNoteToggleBtn.addEventListener("click", () => {
                 noteForm.classList.remove("hidden");
-                clearForm();
+                noteForm.reset();
+                noteIdInput.value = "";
                 saveNoteBtn.innerHTML =
                         '<i class="fa-solid fa-floppy-disk"></i> Save Note';
         });
@@ -317,7 +337,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
                 const id = targetButton.getAttribute("data-id");
 
-                if (targetButton.classList.confirm("edit-btn")) {
+                // *** MODIFICATION (BUG FIX) ***
+                // Fixed typo 'confirm' to 'contains'
+                if (targetButton.classList.contains("edit-btn")) {
                         const noteToEdit = allNotes.find((n) => n.id == id);
                         if (noteToEdit) {
                                 editNote(noteToEdit);
