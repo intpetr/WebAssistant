@@ -26,6 +26,21 @@ class User(db.Model, UserMixin):
         lazy='dynamic',
         cascade='all, delete-orphan'
     )
+
+    posts = db.relationship(
+        'Post',
+        back_populates='user',
+        lazy='dynamic',
+        cascade='all, delete-orphan'
+    )
+
+    ai_recommendations = db.relationship(
+        'AIRecommendation',
+        back_populates='user',
+        lazy='dynamic',
+        cascade='all, delete-orphan'
+    )
+
     @staticmethod
     def get_by_username(username):
         return User.query.filter_by(username=username).first()
@@ -131,3 +146,49 @@ class Note(db.Model):
 
     def __repr__(self):
         return f'<Note {self.note_id}: {self.title}>'
+
+class Post(db.Model):
+    __tablename__ = 'posts'
+
+    id = db.Column(db.Integer, primary_key=True)
+    text = db.Column(db.Text, nullable=False)
+
+    # Foreign key to users.id
+    user_id = db.Column(
+        db.Integer,
+        db.ForeignKey('users.id', ondelete='CASCADE'),
+        nullable=False
+    )
+
+    # Relationship back to the User
+    user = db.relationship('User', back_populates='posts')
+
+    def to_dict(self):
+        """Return a serializable representation of a post."""
+        return {
+            'id': self.id,
+            'text': self.text,
+            'user_id': self.user_id
+        }
+
+    def __repr__(self):
+        return f'<Post {self.id}: {self.text[:20]}>'  # Show first 20 chars
+
+
+class AIRecommendation(db.Model):
+    __tablename__ = 'ai_recommendations'
+
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(
+        db.Integer,
+        db.ForeignKey('users.id', ondelete='CASCADE'),
+        nullable=False
+    )
+    text = db.Column(db.Text, nullable=False)
+
+    # Relationship back to the User
+    user = db.relationship('User', back_populates='ai_recommendations')
+
+    def __repr__(self):
+        return f'<AIRecommendation {self.id}: {self.text[:30]}>'
+

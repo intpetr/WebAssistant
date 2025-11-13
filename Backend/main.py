@@ -1,3 +1,6 @@
+import threading
+
+from ollama import Client
 from datetime import datetime, time
 from flask import Flask, request, jsonify, send_from_directory, redirect, url_for
 from flask_sqlalchemy import SQLAlchemy
@@ -9,6 +12,20 @@ from Models import Event
 from flask_login import LoginManager, login_user, login_required, logout_user, current_user
 from Models import Note
 import api_calls
+import torch
+import numpy as np
+import pandas as pd
+import joblib
+from NeuralNet import NeuralNet
+import joblib
+from Models import AIRecommendation
+
+from flask import Flask, request, jsonify
+import sklearn
+import schedule
+import time
+import threading
+print(sklearn.__version__)
 
 BASE_DIR = os.path.abspath(os.path.dirname(__file__))
 FRONTEND_DIR = os.path.abspath(os.path.join(BASE_DIR, '..', 'Front-end'))
@@ -27,6 +44,9 @@ login_manager = LoginManager()
 login_manager.init_app(app)
 
 login_manager.login_view = 'login_page'
+client = Client()
+
+
 
 
 @login_manager.user_loader
@@ -45,7 +65,6 @@ def unauthorized():
 @app.route('/')
 def index():
     if current_user.is_authenticated:
-
         return redirect(url_for('home_page'))
     return redirect(url_for('login_page'))
 
@@ -60,7 +79,7 @@ def home_page():
 def login_page():
     if current_user.is_authenticated:
         pass
-        #return redirect(url_for('home_page'))
+        # return redirect(url_for('home_page'))
     return send_from_directory(app.static_folder, 'Login/Login.html')
 
 
@@ -240,7 +259,6 @@ def update_note(note_id):
 @app.route('/api/notes/<int:note_id>', methods=['DELETE'])
 @login_required
 def delete_note(note_id):
-
     try:
         note = db.session.get(Note, note_id)
 
@@ -316,24 +334,21 @@ def dashboard():
     return jsonify({"message": f"Hello {current_user.username}, welcome!"})
 
 
-@app.route('/api/weather', methods=['GET'])  # <-- THE FIX
+@app.route('/api/weather', methods=['GET'])
 @login_required
 def weather():
-    # This will now be called correctly
     return api_calls.ApiCalls.get_current_weather().get('current_weather')
 
 
 @app.route('/api/meme', methods=['GET'])
 @login_required
 def meme():
-    # This will now be called correctly
     return api_calls.ApiCalls.get_meme()
 
 
 @app.route('/api/stocks', methods=['GET'])
 @login_required
 def currency():
-    # This will now be called correctly
     return api_calls.ApiCalls.get_currency()
 
 
@@ -342,12 +357,6 @@ def currency():
 def logout():
     logout_user()
     return jsonify({"message": "Logged out successfully"}), 200
-
-
-# @app.route('/api/moon_phase', methods=['GET'])
-# @login_required
-# def moon_phase():
-#    return api_calls.ApiCalls.get_moon_phase()
 
 
 @app.route('/api/news', methods=['GET'])
@@ -381,7 +390,120 @@ def popular_stocks():
     return api_calls.ApiCalls.get_most_popular_stocks(symbols=symbols)
 
 
-# --- Main Execution (No changes) ---
+@app.route('/api/predict', methods=['POST'])
+@login_required
+def predict():
+    BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+
+    MODEL_PATH = os.path.join(BASE_DIR, "pytorch_interest_predictor.pth")
+    PREPROCESSOR_PATH = os.path.join(BASE_DIR, "pytorch_preprocessor.pkl")
+
+    preprocessor = joblib.load(PREPROCESSOR_PATH)
+    state_dict = torch.load(MODEL_PATH, map_location=torch.device('cpu'))
+
+    # Determine input dimension from the saved state_dict
+    if 'layer1.weight' not in state_dict:
+        return jsonify({"error": "Invalid model file"}), 500
+    input_dim = state_dict['layer1.weight'].shape[1]
+
+    model = NeuralNet(input_dim)
+    model.load_state_dict(state_dict)
+    model.eval()
+
+    data = request.get_json()
+    if not data:
+        return jsonify({"error": "No input data provided"}), 400
+
+    df_input = pd.DataFrame([data])
+    X_processed = preprocessor.transform(df_input)
+    if hasattr(X_processed, 'toarray'):
+        X_processed = X_processed.toarray()
+    X_tensor = torch.tensor(X_processed, dtype=torch.float32)
+
+    with torch.no_grad():
+        preds = model(X_tensor).numpy()
+    rounded = (preds >= 0.5).astype(int).tolist()
+
+    return jsonify({"predictions": rounded})
+
+
+@app.route('/api/recommendations', methods=['GET'])
+@login_required
+def slm_endpoint_method():
+    if request.method == 'GET':
+        try:
+            events_query = current_user.events
+            events = events_query.order_by(Event.start_time.asc()).all()
+            events_list = [event.to_dict() for event in events]
+            response = get_ai_recommendations(str(jsonify({"events": events_list})))
+
+            return jsonify({"events": response}), 200
+
+        except Exception as e:
+            app.logger.error(f"Error fetching events for user {current_user.id}: {e}")
+            return jsonify({"error": "An error occurred while retrieving events."}), 500
+
+
+def get_ai_recommendations(raw_events):
+    response = client.chat(
+        model="phi3:mini",
+        messages=[
+            {"role": "system",
+             "content": "based on these events: " + raw_events + " create a bullet point list for the that gives them new activity ideas. also elaborate on the recommended activities, also provide a reason like: based on your event history you usually attend social events at this time (Use singular second person pronoung - you). No more than 3 list elements (one of the 3 must specific to Debrecen) and 7 words in a sentence. Leave 2 blank lines between each"},
+            # {"role": "user", "content": raw_events}
+        ]
+    )
+
+    return response['message']['content']
+
+
+def update_all_recommendations():
+    with app.app_context():
+        print('Updating all recommendations')
+        users = User.query.all()
+
+        for user in users:
+
+
+            user_events = '\n'.join(
+                f"Title: {e.title} | Description: {e.description or '—'} | "
+                f"Notify: {e.notify} | Start: {e.start_time.strftime('%Y-%m-%d %H:%M')} | "
+                f"End: {e.end_time.strftime('%Y-%m-%d %H:%M') if e.end_time else '—'}"
+                for e in user.events
+            )
+
+            new_rec = get_ai_recommendations(user_events)
+
+            rec = AIRecommendation.query.filter_by(user_id=user.id).first()
+
+            if rec:
+                rec.text = new_rec  # update existing record
+                print(f"Updated recommendation for {user.username}")
+            else:
+                rec = AIRecommendation(user_id=user.id, text=new_rec)
+                db.session.add(rec)
+                print(f"Created recommendation for {user.username}")
+            db.session.commit()
+
+        db.session.commit()
+        print("✅ All user recommendations updated.")
+
+
+
+
+
+def run_scheduler():
+    schedule.every(30).minutes.do(update_all_recommendations())
+
+    # Optional: run task immediately on startup
+    update_all_recommendations()
+
+    while True:
+        schedule.run_pending()
+        time.sleep(100)  # check every 10 seconds
+
+
+
 
 if __name__ == "__main__":
     try:
@@ -407,5 +529,8 @@ if __name__ == "__main__":
             print("Database tables checked/created.")
         except Exception as e:
             print(f"Error creating database tables: {e}")
-
+        scheduler_thread = threading.Thread(target=run_scheduler)
+        scheduler_thread.daemon = True
+        scheduler_thread.start()
     app.run(host='0.0.0.0', port=5000, debug=True)
+
