@@ -7,7 +7,7 @@ from flask_sqlalchemy import SQLAlchemy
 import logging
 import os
 from flask_cors import CORS
-from Models import User, db
+from Models import User, db, Post
 from Models import Event
 from flask_login import LoginManager, login_user, login_required, logout_user, current_user
 from Models import Note
@@ -503,6 +503,45 @@ def run_scheduler():
         time.sleep(100)  # check every 10 seconds
 
 
+@app.route('/posts', methods=['GET', 'POST'])
+@login_required  # requires login for POST, GET could be public if desired
+def handle_posts():
+    if request.method == 'POST':
+        data = request.get_json()
+        text = data.get('text')
+
+        if not text:
+            return jsonify({'error': 'Post text is required.'}), 400
+
+        # Create new post
+        post = Post(user_id=current_user.id, text=text)
+        db.session.add(post)
+        db.session.commit()
+
+        return jsonify({
+            'message': 'Post created successfully!',
+            'post': {
+                'id': post.id,
+                'text': post.text,
+                'user_id': post.user_id
+            }
+        }), 201
+
+    elif request.method == 'GET':
+        # Get latest 3 posts, newest first
+        latest_posts = Post.query.order_by(Post.id.desc()).limit(3).all()
+
+        # Build JSON response
+        result = []
+        for post in latest_posts:
+            user = User.query.get(post.user_id)
+            result.append({
+                'id': post.id,
+                'text': post.text,
+                'username': user.username if user else 'Unknown'
+            })
+
+        return jsonify(result), 200
 
 
 if __name__ == "__main__":
