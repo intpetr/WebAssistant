@@ -126,13 +126,75 @@ function createCardContent(key, data) {
         }
 }
 
+// Render a single API card into the container
+function renderCard(apiItem) {
+        const card = document.createElement("div");
+        card.className = "api-card";
+
+        const content = createCardContent(apiItem.key, apiItem.data);
+
+        card.innerHTML = `
+                <h2 class="card-title>${apiItem.title}<h2/>
+                <div class="card-content>
+                        ${content}
+                <div/>
+        `;
+        cardsContainer.appendChild(card);
+}
+
+// Fetching user settings and data from the backend
+async function loadDashboardData() {
+        cardsContainer.innerHTML = `<p class="loading-message> Fetching your personalized data <p/>`;
+
+        try {
+                const response = await fetch(HOME_DATA_ENDPOINT, {
+                        method: "GET",
+                        credentials: "include",
+                });
+
+                if (response.status === 401) {
+                        window.location.href = "/Login/";
+                        return;
+                }
+
+                if (!response.ok) {
+                        throw new Error(`Server status: ${response.status}`);
+                }
+
+                const data = await response.json;
+                const apiResults = data.apis || [];
+
+                cardsContainer.innerHTML = "";
+                if (apiResults.length === 0) {
+                        cardsContainer.innerHTML = `
+                                <p class="loading-message">
+                                        No APIs enabled. Please go to 
+                                        <a href="/Settings/" class="movement-button" style="text-decoration:none; margin: 10px;">Settings</a> 
+                                        to choose what you want to see.
+                                </p>`;
+                        handleAuthStatus(true);
+                        return;
+                }
+
+                apiResults.forEach(renderCard);
+                handleAuthStatus(true);
+        } catch (error) {
+                console.error("Error loading dashboard data", error);
+                cardsContainer.innerHTML = `<p class="loading-message error-message">Failed to load dashboard data. Network error or server issue.</p>`;
+        }
+}
+
 // Function to handle showing/hiding the Login/Register button
-function handleLoginButtonDisplay(isLoggedIn) {
-        if (loginRegisterBtn) {
-                // Hide the button if user is logged in
-                loginRegisterBtn.style.display = isLoggedIn
-                        ? "none"
-                        : "inline-block";
+function handleAuthStatus(isLoggedIn) {
+        if (isLoggedIn) {
+                // Hide Login/Register, Show Logout
+                if (loginRegisterBtn) loginRegisterBtn.classList.add("hidden");
+                if (logoutBtn) logoutBtn.classList.remove("hidden");
+        } else {
+                // Show Login/Register, Hide Logout
+                if (loginRegisterBtn)
+                        loginRegisterBtn.classList.remove("hidden");
+                if (logoutBtn) logoutBtn.classList.add("hidden");
         }
 }
 
@@ -180,5 +242,13 @@ async function handleLogout() {
         window.location.href = "/Login/";
 }
 
-// Run the check when the page loads
-document.addEventListener("DOMContentLoaded", checkAuthentication);
+// Initialization
+document.addEventListener("DOMContentLoaded", () => {
+        // 1. Load the dynamic dashboard content
+        loadDashboardData();
+
+        // 2. Attach logout listener
+        if (logoutBtn) {
+                logoutBtn.addEventListener("click", handleLogout);
+        }
+});
