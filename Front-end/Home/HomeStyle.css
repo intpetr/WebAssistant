@@ -5,12 +5,14 @@
         --dark-green: hsl(170, 100%, 15%);
         --white: hsl(177, 41%, 91%);
         --black: hsl(0, 0%, 20%);
+        --light-grey: #f4f4f4;
 }
 
 body {
         font-family: "Inter", sans-serif;
         background-color: var(--white);
         color: var(--dark-green);
+        padding-bottom: 50px;
 }
 
 nav {
@@ -31,4 +33,58 @@ nav {
         display: inline-block;
         padding: 10px 10px;
         margin: 5px 5px;
+}
+
+/* Styles for cards */
+.api-cards-container {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        gap: 20px;
+        padding: 0 20px;
+        max-width: 1200px;
+        margin: 0 auto;
+}
+
+.api-card {
+        background-color: var(--light-grey);
+        border: 1px solid var(--dark-green);
+        border-radius: 10px;
+        padding: 20px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        transition: transform 0.2s;
+        min-height: 150px;
+        display: flex;
+        flex-direction: column;
+}
+
+.api-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 6px 10px rgba(0, 0, 0, 0.15);
+}
+
+.card-title {
+        color: var(--dark-green);
+        margin-top: 0;
+        font-size: 1.5em;
+        border-bottom: 2px solid var(--dark-green);
+        padding-bottom: 10px;
+        margin-bottom: 15px;
+        font-weight: bolder;
+}
+
+.card-content {
+        flex-grow: 1;
+}
+
+.card-content p {
+        margin: 5px 0;
+        font-size: 0.95em;
+}
+
+.loading-message {
+        grid-column: 1 / -1;
+        text-align: center;
+        padding: 50px;
+        font-size: 1.2em;
+        color: var(--dark-green);
 }

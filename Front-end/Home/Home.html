@@ -17,34 +17,53 @@
                 <nav>
                         <div class="nav-left">
                                 <a
-                                        href="/Calendar/"
+                                        href="/Calendar/Calendar.html"
                                         class="movement-button"
                                         >Calendar</a
                                 >
                                 <a
-                                        href="/Notes/"
+                                        href="/Notes/Notes.html"
                                         class="movement-button"
                                         >Notes</a
                                 >
                         </div>
                         <div class="nav-left">
                                 <a
-                                        href="/Login/"
+                                        href="/Login/Login.html"
                                         class="movement-button"
                                         id="login-register-btn"
                                 >
                                         Login / Register
                                 </a>
-                                
+
                                 <a
-                                        href="/Settings/"
+                                        href="/Settings/Settings.html"
                                         class="movement-button"
                                 >
                                         <i class="fa-solid fa-gear"></i>
                                 </a>
+                                <button
+                                        id="logout-btn"
+                                        class="movement-button hidden"
+                                >
+                                        <i
+                                                class="fa-solid fa-right-from-bracket"
+                                        ></i>
+                                        Logout
+                                </button>
                         </div>
                 </nav>
-                <h1>Welcome to the home page</h1>
+                <main id="home-main-content">
+                        <h1>Welcome to the home page</h1>
+                        <div
+                                id="api-cards-container"
+                                class="api-cards-container"
+                        >
+                                <p class="loading-message">
+                                        Loading your personalized dashboard...
+                                </p>
+                        </div>
+                </main>
 
                 <script src="../api.js"></script>
                 <script src="Home.js?v=1.1"></script>
