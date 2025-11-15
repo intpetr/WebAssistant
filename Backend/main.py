@@ -449,7 +449,7 @@ def get_ai_recommendations(raw_events):
         model="phi3:mini",
         messages=[
             {"role": "system",
-             "content": "based on these events: " + raw_events + " create a bullet point list for the that gives them new activity ideas. also elaborate on the recommended activities, also provide a reason like: based on your event history you usually attend social events at this time (Use singular second person pronoung - you). No more than 3 list elements (one of the 3 must specific to Debrecen) and 7 words in a sentence. Leave 2 blank lines between each"},
+             "content": "based on these events: " + raw_events + " create a bullet point list for the that gives them new activity ideas. also elaborate on the recommended activities, also provide a reason like: based on your event history you usually attend social events at this time (Use singular second person pronoung - you). No more than 3 list elements and 7 words in a sentence. Leave 2 blank lines between each"},
             # {"role": "user", "content": raw_events}
         ]
     )
