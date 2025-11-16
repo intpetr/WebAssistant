@@ -489,6 +489,87 @@ def update_all_recommendations():
         print("✅ All user recommendations updated.")
 
 
+@app.route('/api/home_data', methods=['GET'])
+@login_required
+def home_data():
+    print('making api calls needed for the homepage')
+    # 1. Get the user's settings (or use defaults)
+    user = current_user
+    user_settings_obj = getattr(user, 'settings', None)
+    settings = user_settings_obj.settings if user_settings_obj else {}
+
+    api_results = []
+
+    # 2. Check each setting and call the corresponding API
+    # The 'key' (e.g., "weather") MUST match the 'case' in your frontend JavaScript
+
+    # --- Example: Weather ---
+    # NOTE: Adjust 'weather_enabled' to match the key you save in your user settings
+    if settings.get('weather_enabled', True):
+        try:
+            weather_data = api_calls.ApiCalls.get_current_weather()
+            api_results.append({"key": "weather", "title": "Current Weather", "data": weather_data})
+        except Exception as e:
+            app.logger.error(f"Failed to fetch weather: {e}")
+            api_results.append({"key": "weather", "title": "Current Weather", "data": {"error": str(e)}})
+
+    # --- Example: Currency ---
+    if settings.get('currency_enabled', True):
+        try:
+            currency_data = api_calls.ApiCalls.get_currency()
+            api_results.append({"key": "currency", "title": "Currency (USD to HUF)", "data": currency_data})
+        except Exception as e:
+            app.logger.error(f"Failed to fetch currency: {e}")
+            api_results.append({"key": "currency", "title": "Currency (USD to HUF)", "data": {"error": str(e)}})
+
+    # --- Example: Meme ---
+    if settings.get('meme_enabled', True):
+        try:
+            meme_data = api_calls.ApiCalls.get_meme()
+            api_results.append({"key": "meme", "title": "Daily Meme", "data": meme_data})
+        except Exception as e:
+            app.logger.error(f"Failed to fetch meme: {e}")
+            api_results.append({"key": "meme", "title": "Daily Meme", "data": {"error": str(e)}})
+
+    # --- Example: Stock ---
+    if settings.get('stock_enabled', True):
+        try:
+            # Using your popular_stocks function for this
+            stock_data = api_calls.ApiCalls.get_most_popular_stocks(symbols=['AAPL', 'MSFT', 'GOOGL'])
+            api_results.append({"key": "stock", "title": "Popular Stocks", "data": stock_data})
+        except Exception as e:
+            app.logger.error(f"Failed to fetch stock: {e}")
+            api_results.append({"key": "stock", "title": "Popular Stocks", "data": {"error": str(e)}})
+
+    # --- Example: News ---
+    if settings.get('news_enabled', True):
+        try:
+            news_data = api_calls.ApiCalls.get_latest_news(query='technology', country='hu', language='en')
+            api_results.append({"key": "news", "title": "Tech News", "data": news_data})
+        except Exception as e:
+            app.logger.error(f"Failed to fetch news: {e}")
+            api_results.append({"key": "news", "title": "Tech News", "data": {"error": str(e)}})
+
+    # --- Example: Moon Phase ---
+    if settings.get('moon_enabled', True):
+        try:
+            moon_data = api_calls.ApiCalls.get_moon_data_debrecen()
+            api_results.append({"key": "moon", "title": "Moon Phase", "data": moon_data})
+        except Exception as e:
+            app.logger.error(f"Failed to fetch moon: {e}")
+            api_results.append({"key": "moon", "title": "Moon Phase", "data": {"error": str(e)}})
+
+    # --- Example: Flight Data ---
+    if settings.get('flight_enabled', True):
+        try:
+            flight_data = api_calls.ApiCalls.get_flights_from_budapest(limit=5)
+            api_results.append({"key": "flight", "title": "Flights from BUD", "data": flight_data})
+        except Exception as e:
+            app.logger.error(f"Failed to fetch flight: {e}")
+            api_results.append({"key": "flight", "title": "Flights from BUD", "data": {"error": str(e)}})
+
+    print('returned all api data')
+    return jsonify({"apis": api_results})
 
 
 
@@ -496,7 +577,7 @@ def run_scheduler():
     schedule.every(30).minutes.do(update_all_recommendations())
 
     # Optional: run task immediately on startup
-    update_all_recommendations()
+    #update_all_recommendations()
 
     while True:
         schedule.run_pending()
