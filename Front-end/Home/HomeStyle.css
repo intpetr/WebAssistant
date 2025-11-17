@@ -3,16 +3,24 @@
 /* Declaring colors as constants because of frequent use of them */
 :root {
         --dark-green: hsl(170, 100%, 15%);
+        --light-green: hsl(170, 100%, 25%);
         --white: hsl(177, 41%, 91%);
         --black: hsl(0, 0%, 20%);
         --light-grey: #f4f4f4;
+        --error-red: hsl(0, 80%, 55%);
+        --success-green: hsl(120, 60%, 40%);
 }
 
 body {
         font-family: "Inter", sans-serif;
         background-color: var(--white);
         color: var(--dark-green);
+        margin: 0;
         padding-bottom: 50px;
+        /* Added to make sidebar scrolling work */
+        height: 100vh;
+        display: flex;
+        flex-direction: column;
 }
 
 nav {
@@ -22,6 +30,8 @@ nav {
         display: flex;
         justify-content: space-between;
         align-items: center;
+        /* Make nav sticky to the top */
+        flex-shrink: 0;
 }
 
 .movement-button {
@@ -33,18 +43,233 @@ nav {
         display: inline-block;
         padding: 10px 10px;
         margin: 5px 5px;
+        font-weight: 600;
 }
 
-/* Styles for cards */
+button.movement-button {
+        font-family: "Inter", sans-serif;
+        font-size: 1rem;
+}
+
+.hidden {
+        display: none !important;
+}
+
+.page-title {
+        text-align: center;
+        color: var(--black);
+        flex-shrink: 0;
+}
+
+/* --- NEW: Main Content Wrapper (2-Column Layout) --- */
+.home-content-wrapper {
+        display: flex;
+        flex-direction: row;
+        gap: 20px;
+        max-width: 1400px;
+        width: 100%;
+        margin: 0 auto;
+        padding: 0 20px;
+        box-sizing: border-box;
+        /* Allow content to grow and fill available height */
+        flex-grow: 1;
+        /* This is key for the scrollable sidebar */
+        overflow: hidden;
+}
+
+/* --- UPDATED: API Cards Container (Column 1) --- */
 .api-cards-container {
+        /* This will be the main column */
+        flex-grow: 1;
         display: grid;
         grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
         gap: 20px;
-        padding: 0 20px;
-        max-width: 1200px;
-        margin: 0 auto;
+        /* Make this column scrollable */
+        overflow-y: auto;
+        max-height: calc(100vh - 150px); /* Adjust height as needed */
+        padding: 10px;
 }
 
+/* --- NEW: Sidebar (Column 2) --- */
+.sidebar-content {
+        /* This is the new sidebar */
+        flex-basis: 350px; /* Fixed width */
+        flex-shrink: 0;
+        /* This makes the sidebar scroll independently */
+        overflow-y: auto;
+        max-height: calc(100vh - 150px); /* Adjust height to match nav/header */
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+        padding: 10px;
+}
+
+.sidebar-card {
+        background-color: var(--light-grey);
+        border: 1px solid var(--dark-green);
+        border-radius: 10px;
+        padding: 20px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        display: flex;
+        flex-direction: column;
+        flex-shrink: 0; /* Prevent cards from shrinking */
+}
+
+/* --- NEW: Create Post Form Styles --- */
+.post-form-container {
+        margin-bottom: 20px;
+        border-bottom: 2px solid var(--dark-green);
+        padding-bottom: 20px;
+}
+
+.post-textarea {
+        width: 100%;
+        min-height: 80px;
+        border: 1px solid #ccc;
+        border-radius: 8px;
+        padding: 10px;
+        font-family: "Inter", sans-serif;
+        font-size: 0.95em;
+        box-sizing: border-box; /* Important */
+        resize: vertical;
+        margin-bottom: 10px;
+}
+
+.post-actions {
+        display: flex;
+        justify-content: flex-end;
+        gap: 10px;
+}
+
+.post-submit-btn,
+.post-cancel-btn {
+        padding: 8px 12px;
+        border: none;
+        border-radius: 5px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        font-size: 0.9em;
+}
+
+.post-submit-btn {
+        background-color: var(--dark-green);
+        color: var(--white);
+}
+
+.post-submit-btn:hover:not(:disabled) {
+        background-color: var(--light-green);
+}
+
+.post-cancel-btn {
+        background-color: var(--light-grey);
+        color: var(--black);
+        border: 1px solid #ccc;
+}
+
+.post-cancel-btn:hover {
+        background-color: #ddd;
+}
+
+.post-submit-btn:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+}
+
+/* --- NEW: Post Message Box --- */
+#post-message-box {
+    padding: 10px;
+    border-radius: 5px;
+    margin-bottom: 10px;
+    font-size: 0.875rem;
+    font-weight: 600;
+    display: none; /* Will be shown by JS */
+}
+
+#post-message-box.show {
+    display: block;
+}
+
+#post-message-box.message-success {
+    background-color: hsl(120, 60%, 90%);
+    color: var(--success-green);
+    border: 1px solid var(--success-green);
+}
+
+#post-message-box.message-error {
+    background-color: hsl(0, 80%, 90%);
+    color: var(--error-red);
+    border: 1px solid var(--error-red);
+}
+
+
+/* --- NEW: Post Item Styles --- */
+#posts-list .post-item {
+        border-bottom: 1px solid #ddd;
+        padding: 15px 0;
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+}
+#posts-list .post-item:last-child {
+        border-bottom: none;
+}
+
+.post-details {
+        flex-grow: 1;
+}
+
+/* --- NEW: Styles for the username link --- */
+.post-username-link {
+    text-decoration: none;
+    color: inherit;
+    display: inline-block; /* Ensures the hover works properly */
+}
+
+.post-username {
+        font-weight: 700;
+        color: var(--dark-green);
+        font-size: 1.1em;
+        transition: color 0.2s ease;
+}
+
+.post-username-link:hover .post-username {
+    color: var(--light-green);
+    text-decoration: underline;
+}
+/* --- END NEW --- */
+
+
+.post-text {
+        font-size: 0.95em;
+        color: var(--black);
+        margin: 5px 0 0 0;
+        /* Allow long words to break */
+        word-wrap: break-word;
+}
+
+.like-btn {
+        background: none;
+        border: 1px solid var(--error-red);
+        color: var(--error-red);
+        border-radius: 5px;
+        padding: 5px 8px;
+        cursor: pointer;
+        font-size: 0.9em;
+        margin-left: 10px;
+        transition: all 0.2s ease;
+}
+
+.like-btn:hover {
+        background-color: var(--error-red);
+        color: var(--white);
+}
+
+.like-btn .fa-heart {
+        margin-right: 5px;
+}
+
+/* --- UPDATED: API Card Styles --- */
 .api-card {
         background-color: var(--light-grey);
         border: 1px solid var(--dark-green);
@@ -52,7 +277,7 @@ nav {
         padding: 20px;
         box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
         transition: transform 0.2s;
-        min-height: 150px;
+        /* MODIFIED: Removed min-height to allow cards to fit content */
         display: flex;
         flex-direction: column;
 }
@@ -72,6 +297,10 @@ nav {
         font-weight: bolder;
 }
 
+.card-title .fa-solid {
+        margin-right: 10px;
+}
+
 .card-content {
         flex-grow: 1;
 }
@@ -81,10 +310,118 @@ nav {
         font-size: 0.95em;
 }
 
+/* --- *** STYLES FOR CURRENCY CARD (now in main grid) *** --- */
+/* We target the specific card using the data-key attribute */
+.api-card[data-key="currency"] .currency-base-text {
+    font-size: 1.1em;
+    color: var(--black);
+    margin-bottom: 15px;
+}
+.api-card[data-key="currency"] .base-value {
+    font-weight: 700;
+    color: var(--dark-green);
+}
+
+.api-card[data-key="currency"] .currency-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    /* --- NEW: Use flex for spacing --- */
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.api-card[data-key="currency"] .currency-list-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px;
+    background-color: var(--white);
+    border-radius: 8px;
+    border: 1px solid #ddd;
+}
+
+.api-card[data-key="currency"] .currency-label {
+    font-size: 1em;
+    font-weight: 600;
+    color: var(--black);
+}
+
+.api-card[data-key="currency"] .rate-value {
+    font-size: 1.2em;
+    font-weight: 700;
+    color: var(--dark-green);
+}
+
+.api-card[data-key="currency"] .rate-value-error {
+    font-size: 1.1em;
+    font-weight: 600;
+    color: var(--error-red);
+}
+
+.api-card[data-key="currency"] .currency-footer {
+    margin-top: 20px;
+    padding-top: 10px;
+    border-top: 1px solid #ccc;
+    text-align: center;
+    font-size: 0.85em;
+    color: #666;
+}
+/* --- *** END OF CURRENCY STYLES *** --- */
+
+
+/* --- Utility & Loading/Error Styles --- */
 .loading-message {
-        grid-column: 1 / -1;
+        width: 100%;
         text-align: center;
-        padding: 50px;
+        padding: 50px 0;
         font-size: 1.2em;
         color: var(--dark-green);
+}
+
+.error-message {
+        color: var(--error-red);
+        font-weight: 600;
+}
+
+.text-success-green {
+        color: var(--success-green);
+        font-weight: 600;
+}
+
+.text-error-red {
+        color: var(--error-red);
+        font-weight: 600;
+}
+
+.read-more {
+        color: var(--dark-green);
+        font-weight: 600;
+        text-decoration: none;
+        margin-top: 10px;
+        display: inline-block;
+}
+.read-more:hover {
+        text-decoration: underline;
+}
+
+
+/* Responsive layout for smaller screens */
+@media (max-width: 900px) {
+        .home-content-wrapper {
+                flex-direction: column;
+                overflow: visible; /* Allow page to scroll normally */
+        }
+        
+        .api-cards-container,
+        .sidebar-content {
+                /* Remove fixed height and independent scrolling */
+                max-height: none;
+                overflow-y: visible;
+        }
+
+        .sidebar-content {
+                flex-basis: auto; /* Allow sidebar to be auto-height */
+        }
 }

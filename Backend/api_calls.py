@@ -21,14 +21,23 @@ class ApiCalls:
 
     @staticmethod
     def get_meme():
-        url = "https://api.imgflip.com/get_memes"
+        url = "https://meme-api.com/gimme"
 
-        try:
-            response = requests.get(url)
-            response.raise_for_status()
-            return response.json()
-        except requests.RequestException as e:
-            return {"error": str(e)}
+
+        response = requests.get(url)
+            # Raise an exception for bad status codes (like 404 or 500)
+        response.raise_for_status()
+
+        meme_data = response.json()
+
+            # This API provides a lot of data. We'll return the most useful parts.
+            # 'url' is the direct link to the meme image.
+        return {
+                "title": meme_data.get("title"),
+                "url": meme_data.get("url"),
+                "subreddit": meme_data.get("subreddit"),
+                "author": meme_data.get("author")
+            }
 
     @staticmethod
     def get_moon_phase():
@@ -46,7 +55,7 @@ class ApiCalls:
     @staticmethod
     def get_currency():
         API_KEY = "3335b42684890616b2972231f4ad529c"
-        base_url = "https://api.exchangerate.host/latest"
+        base_url = "https://api.exchangerate.host/live"
 
         params = {
             'base': 'USD',

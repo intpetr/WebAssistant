@@ -1,0 +1,143 @@
+/*
+  MODIFIED: Removed @import. This file is now self-contained.
+*/
+
+/* --- Copied Root Variables from HomeStyle.css --- */
+:root {
+    --dark-green: hsl(170, 100%, 15%);
+    --light-green: hsl(170, 100%, 25%);
+    --white: hsl(177, 41%, 91%);
+    --black: hsl(0, 0%, 20%);
+    --light-grey: #f4f4f4;
+    --error-red: hsl(0, 80%, 55%);
+    --success-green: hsl(120, 60%, 40%);
+}
+
+/* --- Main layout for the profile page --- */
+.profile-content-wrapper {
+    /* MODIFIED: This is not a flex container, so children stack vertically */
+    gap: 20px;
+    max-width: 1000px;
+    width: 100%;
+    margin: 0 auto; /* This centers the content block */
+    padding: 0 20px;
+    box-sizing: border-box;
+}
+
+/* --- Copied Styles from HomeStyle.css Used by Profile.html --- */
+.sidebar-card {
+    background-color: var(--light-grey);
+    border: 1px solid var(--dark-green);
+    border-radius: 10px;
+    padding: 20px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    display: flex;
+    flex-direction: column;
+    flex-shrink: 0;
+}
+
+#profile-info-card {
+    /* Add margin to separate it from the posts card below */
+    margin-bottom: 20px;
+}
+
+.card-title {
+    color: var(--dark-green);
+    margin-top: 0;
+    font-size: 1.5em;
+    border-bottom: 2px solid var(--dark-green);
+    padding-bottom: 10px;
+    margin-bottom: 15px;
+    font-weight: bolder;
+}
+
+.card-title .fa-solid {
+    margin-right: 10px;
+}
+
+.card-content {
+    flex-grow: 1;
+}
+
+.card-content p {
+    margin: 5px 0;
+    font-size: 0.95em;
+}
+
+.loading-message {
+    width: 100%;
+    text-align: center;
+    padding: 50px 0;
+    font-size: 1.2em;
+    color: var(--dark-green);
+}
+
+.error-message {
+    color: var(--error-red);
+    font-weight: 600;
+}
+
+/* --- Styles for the "About" card content --- */
+#profile-info-content p {
+    font-size: 1.1em;
+    color: var(--black);
+}
+
+#profile-info-content strong {
+    color: var(--dark-green);
+}
+
+/* --- Styles for the "Posts" card content --- */
+#profile-posts-list .post-item {
+    border-bottom: 1px solid #ddd;
+    padding: 15px 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+}
+#profile-posts-list .post-item:last-child {
+    border-bottom: none;
+}
+
+.post-details {
+    flex-grow: 1;
+}
+
+.post-text {
+    font-size: 0.95em;
+    color: var(--black);
+    margin: 5px 0 0 0;
+    word-wrap: break-word;
+}
+
+.like-btn {
+    background: none;
+    border: 1px solid var(--error-red);
+    color: var(--error-red);
+    border-radius: 5px;
+    padding: 5px 8px;
+    cursor: pointer;
+    font-size: 0.9em;
+    margin-left: 10px;
+    transition: all 0.2s ease;
+}
+
+.like-btn:hover {
+    background-color: var(--error-red);
+    color: var(--white);
+}
+
+.like-btn .fa-heart {
+    margin-right: 5px;
+}
+
+/* --- Responsive layout for smaller screens --- */
+@media (max-width: 768px) {
+    .profile-content-wrapper {
+        flex-direction: column;
+    }
+
+    #profile-info-card {
+        flex-basis: auto;
+    }
+}

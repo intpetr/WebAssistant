@@ -7,7 +7,8 @@
                         content="width=device-width, initial-scale=1.0"
                 />
                 <title>Home</title>
-                <link rel="stylesheet" href="HomeStyle.css?v=1.1" />
+                <!-- v=1.3 -->
+                <link rel="stylesheet" href="HomeStyle.css?v=1.3" /> 
                 <script
                         src="https://kit.fontawesome.com/9a9b8af8bd.js"
                         crossorigin="anonymous"
@@ -53,8 +54,34 @@
                                 </button>
                         </div>
                 </nav>
-                <main id="home-main-content">
-                        <h1>Welcome to the home page</h1>
+                
+                <header class="page-title">
+                        <h1>Welcome to your Dashboard</h1>
+                </header>
+                <main id="home-main-content" class="home-content-wrapper">
+                        
+                        <aside id="posts-sidebar" class="sidebar-content">
+                                <div id="posts-card" class="sidebar-card">
+                                        <h2 class="card-title">
+                                                <i class="fa-solid fa-newspaper"></i>
+                                                Recent Posts
+                                        </h2>
+
+                                        <form id="create-post-form" class="post-form-container">
+                                            <div id="post-message-box" class="hidden"></div>
+                                            <textarea id="post-textarea" class="post-textarea" placeholder="What's on your mind?"></textarea>
+                                            <div class="post-actions">
+                                                <button type="button" id="post-cancel-btn" class="post-cancel-btn">Cancel</button>
+                                                <button type="submit" id="post-submit-btn" class="post-submit-btn">Post</button>
+                                            </div>
+                                        </form>
+                                        
+                                        <div id="posts-list" class="card-content">
+                                                <p class="loading-message">Loading posts...</p>
+                                        </div>
+                                </div>
+                        </aside>
+
                         <div
                                 id="api-cards-container"
                                 class="api-cards-container"
@@ -63,9 +90,27 @@
                                         Loading your personalized dashboard...
                                 </p>
                         </div>
+
+                        <aside id="sidebar-content" class="sidebar-content">
+                                
+                                <!-- *** CURRENCY CARD REMOVED FROM HERE *** -->
+                                <!-- It is now rendered by Home.js into the api-cards-container -->
+
+                                <div id="ai-recommendation-card" class="sidebar-card">
+                                        <h2 class="card-title">
+                                                <i class="fa-solid fa-wand-magic-sparkles"></i>
+                                                Recommendations
+                                        </h2>
+                                        <div id="ai-recommendation-content" class="card-content">
+                                                <p class="loading-message">Loading recommendations...</p>
+                                        </div>
+                                </div>
+                                
+                                </aside>
                 </main>
 
                 <script src="../api.js"></script>
-                <script src="Home.js?v=1.1"></script>
+                <!-- v=1.3 -->
+                <script src="Home.js?v=1.3"></script>
         </body>
 </html>

@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta
+            name="viewport"
+            content="width=device-width, initial-scale=1.0"
+        />
+        <title>User Profile</title>
+        <!-- MODIFIED: Changed paths to be absolute -->
+        <link rel="stylesheet" href="/Profile/Profile.css?v=1.0" />
+        <link rel="stylesheet" href="/Home/HomeStyle.css?v=1.2" />
+        <script
+            src="https://kit.fontawesome.com/9a9b8af8bd.js"
+            crossorigin="anonymous"
+        ></script>
+    </head>
+    <body>
+        <!-- Re-using the nav bar from Home.html for consistency -->
+        <nav>
+            <div class="nav-left">
+                <a href="/Home/" class="movement-button">Home</a>
+                <a href="/Calendar/Calendar.html" class="movement-button"
+                    >Calendar</a
+                >
+                <a href="/Notes/Notes.html" class="movement-button">Notes</a>
+            </div>
+            <div class="nav-left">
+                <a
+                    href="/Login/Login.html"
+                    class="movement-button"
+                    id="login-register-btn"
+                >
+                    Login / Register
+                </a>
+                <a href="/Settings/Settings.html" class="movement-button">
+                    <i class="fa-solid fa-gear"></i>
+                </a>
+                <button id="logout-btn" class="movement-button hidden">
+                    <i class="fa-solid fa-right-from-bracket"></i>
+                    Logout
+                </button>
+            </div>
+        </nav>
+
+        <header class="page-title">
+            <!-- Title will be filled by JS -->
+            <h1 id="profile-username-title">Loading profile...</h1>
+        </header>
+
+        <!-- Main content area for profile -->
+        <main
+            id="profile-main-content"
+            class="profile-content-wrapper"
+        >
+            <!-- MODIFIED: "About" card is now first -->
+            <div id="profile-info-card" class="sidebar-card">
+                <h2 class="card-title">
+                    <i class="fa-solid fa-user"></i>
+                    About
+                </h2>
+                <div id="profile-info-content" class="card-content">
+                    <p class="loading-message">Loading info...</p>
+                </div>
+            </div>
+
+            <!-- MODIFIED: "Posts" card is now second -->
+            <div id="profile-posts-card" class="sidebar-card">
+                <h2 class="card-title">
+                    <i class="fa-solid fa-newspaper"></i>
+                    Posts
+                </h2>
+                
+                <!-- List where posts will be rendered -->
+                <div id="profile-posts-list" class="card-content">
+                    <p class="loading-message">Loading posts...</p>
+                </div>
+            </div>
+
+        </main>
+
+        <!-- MODIFIED: Changed paths to be absolute -->
+        <script src="/api.js"></script>
+        <script src="/Profile/Profile.js?v=1.0"></script>
+    </body>
+</html>

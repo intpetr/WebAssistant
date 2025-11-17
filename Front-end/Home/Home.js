@@ -2,13 +2,38 @@
 const DASHBOARD_ENDPOINT = `${api}/api/dashboard`;
 const HOME_DATA_ENDPOINT = `${api}/api/home_data`;
 const LOGOUT_ENDPOINT = `${api}/api/logout`;
+// --- NEW ENDPOINTS ---
+const RECOMMENDATION_ENDPOINT = `${api}/api/recommendations`;
+const POSTS_ENDPOINT = `${api}/api/posts`;
+
 
 // DOM element references
 const cardsContainer = document.getElementById("api-cards-container");
 const loginRegisterBtn = document.getElementById("login-register-btn");
 const logoutBtn = document.getElementById("logout-btn");
+// --- NEW DOM REFERENCES ---
+const recommendationContent = document.getElementById("ai-recommendation-content");
+const postsList = document.getElementById("posts-list");
+// --- REMOVED: Reference for the old currency card ---
+// const currencyCardContent = document.getElementById("currency-card-content"); 
+// --- NEW DOM REFERENCES FOR CREATE POST ---
+const createPostForm = document.getElementById("create-post-form");
+const postTextarea = document.getElementById("post-textarea");
+const postSubmitBtn = document.getElementById("post-submit-btn");
+const postCancelBtn = document.getElementById("post-cancel-btn");
+const postMessageBox = document.getElementById("post-message-box");
+
 
 /* Data Rendering Functions */
+
+// --- REMOVED: renderCurrencyCard function is no longer needed ---
+
+/**
+ * Creates HTML content for the main dashboard cards.
+ * @param {string} key - The API key (e.g., "weather", "meme").
+ * @param {object} data - The data object for that API.
+ * @returns {string} HTML string for the card content.
+ */
 function createCardContent(key, data) {
     if (data.error) {
         return `<p class="error-message"> Error fetching data: ${data.error} </p>`;
@@ -24,24 +49,72 @@ function createCardContent(key, data) {
                 <p> Temperature: <strong>${current.temperature} °C </strong></p>
                 <p> Wind speed: ${current.windspeed} km/h </p>
                 <p> Wind direction: ${current.winddirection} °</p>
-            `; // Fixed typo: currend -> current
+            `;
 
+        // *** NEW: "currency" case added back ***
         case "currency":
-            const rate = data.rates ? data.rates.HUF : "N/A";
-            const base = data.base || "USD";
+            if (data.error || !data.success) {
+                return `<p class="error-message">Error fetching currency data: ${data.error || 'API request failed.'}</p>`;
+            }
+
+            // 1. Get Base Currency and Timestamp
+            const base = data.source || "USD";
+            const date = new Date(data.timestamp * 1000);
+            const formattedDate = date.toLocaleString([], {
+                year: 'numeric',
+                month: 'numeric',
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+
+            // 2. Define which currencies to display
+            const currenciesToShow = [
+                { key: 'USDHUF', label: 'HUF' },
+                { key: 'USDEUR', label: 'EUR' },
+                { key: 'USDJPY', label: 'JPY' },
+                { key: 'USDGBP', label: 'GBP' }
+            ];
+
+            // 3. Build the HTML list of rates
+            const ratesListHtml = currenciesToShow.map(currency => {
+                const rate = data.quotes[currency.key];
+                if (!rate) {
+                    return `<li class="currency-list-item">
+                                <span>${currency.label}</span>
+                                <span class="rate-value-error">N/A</span>
+                            </li>`;
+                }
+                return `<li class="currency-list-item">
+                            <span class="currency-label">${currency.label}</span>
+                            <span class="rate-value">${rate.toFixed(4)}</span>
+                        </li>`;
+            }).join("");
+
+            // 4. Build the final card content
+            // This HTML will be placed inside the .card-content div
             return `
-            <p>Base Currency: <strong>${base}</strong></p>
-            <p>1 ${base} = <strong>${rate} HUF</strong></p>
-            <p>Last Updated: ${data.date || "Unknown"}</p>`;
+                <p class="currency-base-text">
+                    Base Currency: <strong class="base-value">${base}</strong>
+                </p>
+                <ul class="currency-list">
+                    ${ratesListHtml}
+                </ul>
+                <div class="currency-footer">
+                    Last Updated: ${formattedDate}
+                </div>
+            `;
+        // *** END OF NEW "currency" case ***
 
         case "meme":
-            if (
-                data.data &&
-                data.data.memes &&
-                data.data.memes.length > 0
-            ) {
-                const meme = data.data.memes[0];
-                return `<img src="${meme.url}" alt="${meme.name}" style="max-width: 100%; height: auto; border-radius: 5px;">`;
+            // The 'data' object itself is the meme data: { title, url, ... }
+            if (data && data.url) {
+                return `<img src="${data.url}" alt="${
+                    data.title || "Daily Meme"
+                }" style="max-width: 100%; height: auto; border-radius: 5px;">`;
+            }
+            if (data.error) {
+                 return `<p class="error-message"> Error fetching meme: ${data.error} </p>`;
             }
             return `<p>No meme available.</p>`;
 
@@ -130,10 +203,11 @@ function createCardContent(key, data) {
 function renderCard(apiItem) {
     const card = document.createElement("div");
     card.className = "api-card";
+    // --- NEW: Add a data-key attribute for styling ---
+    card.setAttribute('data-key', apiItem.key);
 
     const content = createCardContent(apiItem.key, apiItem.data);
 
-    // Fixed HTML: Added closing quotes and proper closing tags
     card.innerHTML = `
             <h2 class="card-title">${apiItem.title}</h2>
             <div class="card-content">
@@ -145,7 +219,6 @@ function renderCard(apiItem) {
 
 // Fetching user settings and data from the backend
 async function loadDashboardData() {
-    // Fixed HTML: Added closing quote and closing tag
     cardsContainer.innerHTML = `<p class="loading-message"> Fetching your personalized data </p>`;
 
     try {
@@ -163,12 +236,15 @@ async function loadDashboardData() {
             throw new Error(`Server status: ${response.status}`);
         }
 
-        // *** THE MAIN FIX ***
-        // Added () to .json()
         const data = await response.json(); 
         const apiResults = data.apis || [];
 
         cardsContainer.innerHTML = "";
+        
+        // --- *** MODIFIED LOGIC *** ---
+        // Reverted to the simple version.
+        // The 'currency' card is now rendered just like all other cards.
+        
         if (apiResults.length === 0) {
             cardsContainer.innerHTML = `
                 <p class="loading-message">
@@ -176,17 +252,214 @@ async function loadDashboardData() {
                     <a href="/Settings/" class="movement-button" style="text-decoration:none; margin: 10px;">Settings</a> 
                     to choose what you want to see.
                 </p>`;
-            handleAuthStatus(true);
-            return;
+        } else {
+            // Render all cards, including the currency card
+            apiResults.forEach(renderCard);
         }
+        // --- *** END OF MODIFIED LOGIC *** ---
 
-        apiResults.forEach(renderCard);
         handleAuthStatus(true);
+
     } catch (error) {
         console.error("Error loading dashboard data", error);
         cardsContainer.innerHTML = `<p class="loading-message error-message">Failed to load dashboard data. Network error or server issue.</p>`;
+        // --- REMOVED: No longer need to update separate currency card on error ---
+        handleAuthStatus(false); // Assume auth failed if network error
     }
 }
+
+// --- Load AI Recommendations ---
+async function loadAiRecommendation() {
+    if (!recommendationContent) return;
+    
+    recommendationContent.innerHTML = `<p class="loading-message">Loading recommendations...</p>`;
+    try {
+        const response = await fetch(RECOMMENDATION_ENDPOINT, {
+            method: "GET",
+            credentials: "include"
+        });
+
+        if (response.status === 401) {
+             recommendationContent.innerHTML = `<p class="error-message">Please log in to see recommendations.</p>`;
+             return;
+        }
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.error || `Server status: ${response.status}`);
+        }
+
+        const data = await response.json();
+        
+        // Format the plain text response with line breaks
+        const formattedText = data.events.replace(/\n/g, '<br>');
+        recommendationContent.innerHTML = `<p>${formattedText}</p>`;
+
+    } catch (error) {
+        console.error("Error loading recommendations:", error);
+        recommendationContent.innerHTML = `<p class="error-message">Could not load recommendations.</p>`;
+    }
+}
+
+// --- NEW: Show Post-specific Message ---
+/**
+ * Displays a message in the post form's message box.
+ * @param {string} message The text to display.
+ * @param {'success' | 'error'} type The type of message.
+ */
+function showPostMessage(message, type = "error") {
+    if (!postMessageBox) return;
+    postMessageBox.textContent = message;
+    postMessageBox.className = `message-${type} show`;
+
+    // Hide after 5 seconds
+    setTimeout(() => {
+        postMessageBox.className = "hidden";
+        postMessageBox.textContent = "";
+    }, 5000);
+}
+
+// --- NEW: Handle Create Post ---
+async function handleCreatePost(e) {
+    e.preventDefault(); // Prevent default form submission
+    if (!postTextarea || !postSubmitBtn) return;
+
+    const text = postTextarea.value.trim();
+    if (!text) {
+        showPostMessage("Post content cannot be empty.", "error");
+        return;
+    }
+
+    const originalButtonText = postSubmitBtn.textContent;
+    postSubmitBtn.disabled = true;
+    postSubmitBtn.textContent = "Posting...";
+
+    try {
+        const response = await fetch(POSTS_ENDPOINT, {
+            method: "POST",
+            credentials: "include",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ text: text }),
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.error || `Server error: ${response.status}`);
+        }
+
+        // Post created successfully
+        showPostMessage("Post created successfully!", "success");
+        postTextarea.value = ""; // Clear the textarea
+        loadPosts(); // Refresh the posts list
+
+    } catch (error) {
+        console.error("Error creating post:", error);
+        showPostMessage(error.message, "error");
+    } finally {
+        postSubmitBtn.disabled = false;
+        postSubmitBtn.textContent = originalButtonText;
+    }
+}
+
+
+// --- Load Recent Posts (UPDATED) ---
+async function loadPosts() {
+    if (!postsList) return;
+
+    postsList.innerHTML = `<p class="loading-message">Loading posts...</p>`;
+    try {
+        const response = await fetch(POSTS_ENDPOINT, {
+            method: "GET",
+            credentials: "include"
+        });
+
+        if (response.status === 401) {
+             postsList.innerHTML = `<p class="error-message">Please log in to see posts.</p>`;
+             return;
+        }
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.error || `Server status: ${response.status}`);
+        }
+
+        const posts = await response.json();
+        
+        if (!posts || posts.length === 0) {
+            postsList.innerHTML = `<p>No posts found yet.</p>`;
+            return;
+        }
+
+        // Build HTML for the top posts, now including the 'likes' count
+        postsList.innerHTML = posts.map(post => `
+            <div class="post-item" data-post-id="${post.id}">
+                <div class="post-details">
+                    <!-- MODIFIED: Turned the username into a link -->
+                    <a href="/users/${post.username}" class="post-username-link">
+                        <span class="post-username">${post.username}</span>
+                    </a>
+                    <p class="post-text">${post.text}</p>
+                </div>
+                <button class="like-btn" data-post-id="${post.id}" data-liked="false">
+                    <i class="fa-regular fa-heart"></i> ${post.likes}
+                </button>
+            </div>
+        `).join("");
+
+    } catch (error) {
+        console.error("Error loading posts:", error);
+        postsList.innerHTML = `<p class="error-message">Could not load posts.</p>`;
+    }
+}
+
+// --- Handle Like Button Click (IMPLEMENTED) ---
+async function handleLikeClick(e) {
+    const likeButton = e.target.closest('.like-btn');
+    if (!likeButton) return;
+
+    const postId = likeButton.dataset.postId;
+    const isLiked = likeButton.dataset.liked === 'true';
+
+    // If already liked in this session, do nothing.
+    if (isLiked) {
+        console.log("Already liked this post in this session.");
+        return;
+    }
+
+    // Disable button to prevent double-clicking
+    likeButton.disabled = true;
+
+    try {
+        const response = await fetch(`${POSTS_ENDPOINT}/${postId}/like`, {
+            method: "POST",
+            credentials: "include", // Send cookies
+            headers: {
+                "Content-Type": "application/json"
+            }
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.error || `Server error: ${response.status}`);
+        }
+
+        // The backend returns the updated post object
+        const updatedPost = await response.json();
+
+        // Update the button visually to show it's "liked"
+        likeButton.dataset.liked = 'true';
+        likeButton.innerHTML = `<i class="fa-solid fa-heart"></i> ${updatedPost.likes}`;
+        likeButton.style.color = 'var(--white)';
+        likeButton.style.backgroundColor = 'var(--error-red)';
+        
+        // Keep the button disabled for this session
+        // likeButton.disabled = false; // <-- We keep it disabled
+
+    } catch (error) {
+        console.error(`Failed to like post ${postId}:`, error);
+        // Re-enable button if the request failed so user can try again
+        likeButton.disabled = false;
+    }
+}
+
 
 // Function to handle showing/hiding the Login/Register button
 function handleAuthStatus(isLoggedIn) {
@@ -199,38 +472,6 @@ function handleAuthStatus(isLoggedIn) {
         if (loginRegisterBtn)
             loginRegisterBtn.classList.remove("hidden");
         if (logoutBtn) logoutBtn.classList.add("hidden");
-    }
-}
-
-// Function to check if the user is currently logged in
-async function checkAuthentication() {
-    try {
-        const response = await fetch(DASHBOARD_ENDPOINT, {
-            method: "GET",
-            credentials: "include", // Crucial: must send the cookie
-        });
-
-        if (response.status === 401) {
-            console.warn(
-                "Authentication check failed. Redirecting to login."
-            );
-            // If unauthorized, redirect to the login page immediately
-            // *** MODIFIED ***
-            // Changed from "../Login/Login.html" to the route "/Login/"
-            window.location.href = "/Login/";
-        } else if (!response.ok) {
-            console.error(
-                `Dashboard check failed with status: ${response.status}`
-            );
-            // Handle other potential non-auth errors gracefully
-        }
-        // If response is OK (200), user is authenticated, and the page loads normally.
-    } catch (error) {
-        console.error(
-            "Network error during authentication check:",
-            error
-        );
-        // This usually means the server is down, but keep user on page for now.
     }
 }
 
@@ -248,11 +489,32 @@ async function handleLogout() {
 
 // Initialization
 document.addEventListener("DOMContentLoaded", () => {
-    // 1. Load the dynamic dashboard content
-    loadDashboardData();
+    // 1. Load all dynamic content concurrently
+    loadDashboardData(); // This will now also trigger renderCurrencyCard
+    loadAiRecommendation();
+    loadPosts();
 
     // 2. Attach logout listener
     if (logoutBtn) {
         logoutBtn.addEventListener("click", handleLogout);
+    }
+
+    // 3. Attach like button listener (using event delegation)
+    if (postsList) {
+        postsList.addEventListener('click', handleLikeClick);
+    }
+
+    // --- NEW: Attach Create Post Listeners ---
+    if (createPostForm) {
+        createPostForm.addEventListener("submit", handleCreatePost);
+    }
+    if (postCancelBtn) {
+        postCancelBtn.addEventListener("click", () => {
+            if (postTextarea) postTextarea.value = "";
+            if (postMessageBox) {
+                postMessageBox.className = "hidden";
+                postMessageBox.textContent = "";
+            }
+        });
     }
 });

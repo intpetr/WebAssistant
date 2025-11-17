@@ -153,6 +153,7 @@ class Post(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     text = db.Column(db.Text, nullable=False)
 
+    likes = db.Column(db.Integer, nullable=False, default=0)
     # Foreign key to users.id
     user_id = db.Column(
         db.Integer,
@@ -168,7 +169,9 @@ class Post(db.Model):
         return {
             'id': self.id,
             'text': self.text,
-            'user_id': self.user_id
+            'user_id': self.user_id,
+            'username': self.user.username,  # <-- MODIFIED: Added this line
+            'likes': self.likes               # <-- MODIFIED: Added this line
         }
 
     def __repr__(self):
@@ -191,4 +194,3 @@ class AIRecommendation(db.Model):
 
     def __repr__(self):
         return f'<AIRecommendation {self.id}: {self.text[:30]}>'
-
