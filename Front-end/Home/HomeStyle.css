@@ -310,6 +310,34 @@ button.movement-button {
         font-size: 0.95em;
 }
 
+/* --- *** NEW STYLES FOR FLIGHT CARD *** --- */
+.api-card[data-key="flight"] .flight-item {
+    border-bottom: 1px solid #ddd;
+    padding-bottom: 10px;
+    margin-bottom: 10px;
+}
+.api-card[data-key="flight"] .flight-item:last-child {
+    border-bottom: none;
+    margin-bottom: 0;
+    padding-bottom: 0;
+}
+.api-card[data-key="flight"] .flight-item p {
+    margin: 2px 0;
+    font-size: 0.9em;
+}
+.api-card[data-key="flight"] .flight-airline {
+    font-size: 1.05em !important;
+    color: var(--dark-green);
+}
+.api-card[data-key="flight"] .flight-dest {
+    font-weight: 600;
+}
+.api-card[data-key="flight"] .flight-time {
+    color: #333;
+}
+/* --- *** END OF NEW FLIGHT STYLES *** --- */
+
+
 /* --- *** STYLES FOR CURRENCY CARD (now in main grid) *** --- */
 /* We target the specific card using the data-key attribute */
 .api-card[data-key="currency"] .currency-base-text {

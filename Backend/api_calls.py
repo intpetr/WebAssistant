@@ -21,12 +21,9 @@ class ApiCalls:
 
     @staticmethod
     def get_meme():
-        url = "https://meme-api.com/gimme"
-
+        url = "https://meme-api.com/gimme/wholesomememes"
 
         response = requests.get(url)
-            # Raise an exception for bad status codes (like 404 or 500)
-        response.raise_for_status()
 
         meme_data = response.json()
 
@@ -106,28 +103,28 @@ class ApiCalls:
         Replace YOUR_API_KEY_HERE with your key from https://aviationstack.com/
         You can adjust the 'limit' to control how many flight records are returned.
         """
-        API_KEY = "YOUR_API_KEY_HERE"  # <-- Fill in your AviationStack API key
+
+        API_KEY = "5a51064a1b4ff10042c5bf460544ac86"  # <-- Fill in your AviationStack API key
         url = "http://api.aviationstack.com/v1/flights"
 
         params = {
-            "access_key": '8753b001d81711d2e98913c474270e2f',
-            "dep_iata": "BUD",  # Only flights departing from Budapest
-            "limit": limit       # Number of records to fetch
-        }
+        "access_key": API_KEY,  # <-- MODIFIED: Uses the variable now
+        "dep_iata": "BUD",  # Only flights departing from Budapest
+        "limit": limit  # Number of records to fetch
+    }
 
         try:
             response = requests.get(url, params=params)
             response.raise_for_status()
             data = response.json()
 
-            # Optional: handle API-level errors
+        # Optional: handle API-level errors
             if "error" in data:
                 return {"error": data["error"]}
 
             return data
         except requests.RequestException as e:
             return {"error": str(e)}
-
     import requests
     @staticmethod
     def get_moon_data_debrecen():

@@ -476,14 +476,14 @@ def get_ai_recommendations(raw_events):
                         "1. Provide EXACTLY 3 recommendations.\n"
                         "2. Each recommendation must be a single bullet point.\n"
                         "3. Each recommendation must have a title, a short description (max 7 words), and a brief reason.\n"
-                        "4. You MUST end each recommendation with NN.\n"
+                        "4. You MUST end each recommendation with 'NN'.\n"
                         "5. You MUST not mention specific locations, just general ideas.\n"
                         "6. Do not write anything else. No introduction, no conclusion.\n\n"
                         "User History: " + raw_events + "\n\n"
                                                         "Example Output:\n"
-                                                        " Go Hiking: Explore a new trail. You often enjoy nature activities. NN"
-                                                        " Visit a Museum: See the new art exhibit. You attended a gallery last month. NN"
-                                                        " Try a Cooking Class: Learn a new recipe. You seem to enjoy food-related events. NN"}
+                                                        " Go Hiking: Explore a new trail. You often enjoy nature activities. 'NN'"
+                                                        " Visit a Museum: See the new art exhibit. You attended a gallery last month. 'NN'"
+                                                        " Try a Cooking Class: Learn a new recipe. You seem to enjoy food-related events. 'NN'"}
             # {"role": "user", "content": raw_events}
         ]
     )
@@ -586,8 +586,8 @@ def cache_api_responses():
     # --- Example: Currency ---
     if True:
         try:
-            #currency_data = api_calls.ApiCalls.get_currency()
-            cached_api_results['currency'] = {"key": "currency", "title": "Currency (USD to HUF)", "data": 'currency_data'}
+            currency_data = api_calls.ApiCalls.get_currency()
+            cached_api_results['currency'] = {"key": "currency", "title": "Currency (USD to HUF)", "data": currency_data}
         except Exception as e:
             app.logger.error(f"Failed to fetch currency: {e}")
             cached_api_results['currency'] = {"key": "currency", "title": "Currency (USD to HUF)", "data": {"error": str(e)}}

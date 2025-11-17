@@ -174,22 +174,46 @@ function createCardContent(key, data) {
                     } / Moonrise: ${data.moonrise || "N/A"}</p>
             `;
 
+        // *** MODIFIED: Updated flight card logic ***
         case "flight":
             if (data.data && data.data.length > 0) {
-                const flight = data.data[0];
-                return `
-                        <p>Airline: <strong>${
-                            flight.airline.name || "N/A"
-                        }</strong></p>
-                        <p>Flight #: ${
-                            flight.flight.number || "N/A"
-                        }</p>
-                        <p>Destination: ${
-                            flight.arrival.airport || "N/A"
-                        }</p>
-                `;
+                // Get the top 3 flights as requested
+                const topFlights = data.data.slice(0, 3);
+                
+                // Map them to HTML elements
+                const flightListHtml = topFlights.map(flight => {
+                    const airline = flight.airline.name || "N/A";
+                    const flightNum = flight.flight.iata || flight.flight.number || "N/A";
+                    const destination = flight.arrival.airport || "N/A";
+                    const destIata = flight.arrival.iata || "";
+
+                    // Format scheduled time (e.g., "2025-11-17T06:20:00+00:00")
+                    let scheduledTime = "N/A";
+                    if (flight.departure.scheduled) {
+                        try {
+                            const date = new Date(flight.departure.scheduled);
+                            scheduledTime = date.toLocaleTimeString([], {
+                                hour: '2-digit',
+                                minute: '2-digit'
+                            });
+                        } catch (e) {
+                            console.error("Error parsing flight date", e);
+                        }
+                    }
+
+                    return `
+                        <div class="flight-item">
+                            <p class="flight-airline"><strong>${airline}</strong> (${flightNum})</p>
+                            <p class="flight-dest">To: ${destination} (${destIata})</p>
+                            <p class="flight-time">Scheduled: ${scheduledTime}</p>
+                        </div>
+                    `;
+                }).join(""); // Join all flight items together
+
+                return flightListHtml;
             }
             return `<p>No flight data available.</p>`;
+        // *** END OF MODIFICATION ***
 
         case "prayer":
             return `<p>Daily prayer feature is enabled but not yet connected to a data source.</p>`;
