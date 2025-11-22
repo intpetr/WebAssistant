@@ -1,0 +1,415 @@
+{
+  "info": {
+    "name": "Dashboard API",
+    "description": "API collection for user, notes, events, posts, dashboard, public API endpoints",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Register",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "url": {
+          "raw": "http://localhost:5000/api/register",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "5000",
+          "path": ["api", "register"]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"username\": \"demo\",\n  \"password\": \"1234\",\n  \"email\": \"demo@email.com\"\n}"
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Login",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "url": {
+          "raw": "http://localhost:5000/api/login",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "5000",
+          "path": ["api", "login"]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"username\": \"demo\",\n  \"password\": \"1234\"\n}"
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Logout",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:5000/api/logout",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "5000",
+          "path": ["api", "logout"]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Get Settings",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "http://localhost:5000/api/settings",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "5000",
+          "path": ["api", "settings"]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Update Settings",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "url": {
+          "raw": "http://localhost:5000/api/settings",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "5000",
+          "path": ["api", "settings"]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"settings\": {\n    \"weather_enabled\": true,\n    \"stock_enabled\": true,\n    \"currency_enabled\": false\n  }\n}"
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "List Notes",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "http://localhost:5000/api/notes",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "5000",
+          "path": ["api", "notes"]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Create Note",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "url": {
+          "raw": "http://localhost:5000/api/notes",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "5000",
+          "path": ["api", "notes"]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"title\": \"Test Note\",\n  \"content\": \"Ez egy teszt jegyzet.\"\n}"
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Update Note",
+      "request": {
+        "method": "PUT",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "url": {
+          "raw": "http://localhost:5000/api/notes/1",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "5000",
+          "path": ["api", "notes", "1"]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"title\": \"Updated Note\",\n  \"content\": \"Jegyzet tartalma frissítve.\"\n}"
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Delete Note",
+      "request": {
+        "method": "DELETE",
+        "url": {
+          "raw": "http://localhost:5000/api/notes/1",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "5000",
+          "path": ["api", "notes", "1"]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Get Events",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "http://localhost:5000/api/calendar",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "5000",
+          "path": ["api", "calendar"]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Create Event",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "url": {
+          "raw": "http://localhost:5000/api/calendar",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "5000",
+          "path": ["api", "calendar"]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"title\": \"Meeting\",\n  \"date\": \"2024-01-20\",\n  \"startTime\": \"10:00\",\n  \"endTime\": \"11:00\",\n  \"description\": \"Project discussion\",\n  \"notify\": true\n}"
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Dashboard Greeting",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "http://localhost:5000/api/dashboard",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "5000",
+          "path": ["api", "dashboard"]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Get Weather",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "http://localhost:5000/api/weather",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "5000",
+          "path": ["api", "weather"]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Get Meme",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "http://localhost:5000/api/meme",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "5000",
+          "path": ["api", "meme"]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Get Currency",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "http://localhost:5000/api/stocks",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "5000",
+          "path": ["api", "stocks"]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Get News",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "http://localhost:5000/api/news?query=technology&country=hu&language=en",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "5000",
+          "path": ["api", "news"],
+          "query": [
+            { "key": "query", "value": "technology" },
+            { "key": "country", "value": "hu" },
+            { "key": "language", "value": "en" }
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Get Flights",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "http://localhost:5000/api/flights?limit=10",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "5000",
+          "path": ["api", "flights"],
+          "query": [
+            { "key": "limit", "value": "10" }
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Get Moon Phase",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "http://localhost:5000/api/moon_phase",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "5000",
+          "path": ["api", "moon_phase"]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Get Popular Stocks",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "http://localhost:5000/api/popular_stocks?symbols=AAPL&symbols=MSFT&symbols=GOOGL",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "5000",
+          "path": ["api", "popular_stocks"],
+          "query": [
+            { "key": "symbols", "value": "AAPL" },
+            { "key": "symbols", "value": "MSFT" },
+            { "key": "symbols", "value": "GOOGL" }
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "NeuralNet Predict",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "url": {
+          "raw": "http://localhost:5000/api/predict",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "5000",
+          "path": ["api", "predict"]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"interest_field_1\": 1,\n  \"interest_field_2\": 0\n}"
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Get AI Recommendations",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "http://localhost:5000/api/recommendations",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "5000",
+          "path": ["api", "recommendations"]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Get Home Data",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "http://localhost:5000/api/home_data",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "5000",
+          "path": ["api", "home_data"]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Latest Posts",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "http://localhost:5000/posts",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "5000",
+          "path": ["posts"]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Create Post",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "url": {
+          "raw": "http://localhost:5000/posts",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "5000",
+          "path": ["posts"]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"text\": \"Ez egy teszt poszt.\"\n}"
+        }
+      },
+      "response": []
+    }
+  ]
+}
