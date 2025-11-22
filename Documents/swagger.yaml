@@ -1,0 +1,581 @@
+openapi: 3.0.0
+info:
+  title: Dashboard API
+  version: "1.0"
+  description: API for events, notes, posts, user, AI recommendations, weather, currency, etc.
+servers:
+  - url: http://localhost:5000
+tags:
+  - name: Auth
+  - name: User
+  - name: Settings
+  - name: Notes
+  - name: Events
+  - name: Dashboard
+  - name: PublicAPI
+  - name: Posts
+
+paths:
+  /api/register:
+    post:
+      tags: [Auth]
+      summary: Register new user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                username: { type: string }
+                password: { type: string }
+                email: { type: string }
+              required: [username, password]
+      responses:
+        '201':
+          description: Successful registration
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message: { type: string }
+        '400':
+          description: Error in registration data or user exists
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error: { type: string }
+  /api/login:
+    post:
+      tags: [Auth]
+      summary: Login user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                username: { type: string }
+                password: { type: string }
+              required: [username, password]
+      responses:
+        '200':
+          description: Login success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message: { type: string }
+                  redirect: { type: string }
+        '401':
+          description: Invalid credentials
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error: { type: string }
+  /api/logout:
+    post:
+      tags: [Auth]
+      summary: Logout user
+      responses:
+        '200':
+          description: Logout success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message: { type: string }
+  /api/settings:
+    get:
+      tags: [Settings]
+      summary: Get current user's settings
+      responses:
+        '200':
+          description: Current user settings
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  settings: { type: object }
+    post:
+      tags: [Settings]
+      summary: Update current user's settings
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                settings: { type: object }
+      responses:
+        '200':
+          description: Settings updated
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message: { type: string }
+        '400':
+          description: Missing settings
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error: { type: string }
+  /api/notes:
+    get:
+      tags: [Notes]
+      summary: Get list of notes (current user)
+      responses:
+        '200':
+          description: List of notes
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  notes:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Note'
+        '500':
+          description: Server error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error: { type: string }
+    post:
+      tags: [Notes]
+      summary: Create new note
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                title: { type: string }
+                content: { type: string }
+              required: [content]
+      responses:
+        '201':
+          description: Note created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Note'
+        '400':
+          description: Note content missing
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error: { type: string }
+  /api/notes/{note_id}:
+    put:
+      tags: [Notes]
+      summary: Update a note
+      parameters:
+        - in: path
+          name: note_id
+          required: true
+          schema: { type: integer }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                title: { type: string }
+                content: { type: string }
+              required: [content]
+      responses:
+        '200':
+          description: Note updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Note'
+        '400':
+          description: Note content missing
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error: { type: string }
+        '404':
+          description: Note not found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error: { type: string }
+        '403':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error: { type: string }
+    delete:
+      tags: [Notes]
+      summary: Delete a note
+      parameters:
+        - in: path
+          name: note_id
+          required: true
+          schema: { type: integer }
+      responses:
+        '200':
+          description: Note deleted
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message: { type: string }
+        '404':
+          description: Note not found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error: { type: string }
+        '403':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error: { type: string }
+  /api/calendar:
+    get:
+      tags: [Events]
+      summary: Get events (current user)
+      responses:
+        '200':
+          description: List of events
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  events:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Event'
+        '500':
+          description: Server error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error: { type: string }
+    post:
+      tags: [Events]
+      summary: Create event
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                title: { type: string }
+                date: { type: string }
+                startTime: { type: string }
+                endTime: { type: string }
+                description: { type: string }
+                notify: { type: boolean }
+              required: [title, date, startTime]
+      responses:
+        '201':
+          description: Event created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Event'
+        '400':
+          description: Missing event data
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error: { type: string }
+        '500':
+          description: Server error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error: { type: string }
+  /api/dashboard:
+    get:
+      tags: [Dashboard]
+      summary: Dashboard greeting
+      responses:
+        '200':
+          description: Dashboard data
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message: { type: string }
+  /api/weather:
+    get:
+      tags: [PublicAPI]
+      summary: Get current weather (Budapest)
+      responses:
+        '200':
+          description: Weather data
+          content:
+            application/json:
+              schema:
+                type: object
+  /api/meme:
+    get:
+      tags: [PublicAPI]
+      summary: Get meme data
+      responses:
+        '200':
+          description: Meme data
+          content:
+            application/json:
+              schema:
+                type: object
+  /api/stocks:
+    get:
+      tags: [PublicAPI]
+      summary: Get currency USD/HUF
+      responses:
+        '200':
+          description: Currency data
+          content:
+            application/json:
+              schema:
+                type: object
+  /api/news:
+    get:
+      tags: [PublicAPI]
+      summary: Get news
+      parameters:
+        - in: query
+          name: query
+          schema: { type: string }
+          description: Search query
+        - in: query
+          name: country
+          schema: { type: string }
+          description: Country code
+        - in: query
+          name: language
+          schema: { type: string }
+          description: Language code
+      responses:
+        '200':
+          description: News response
+          content:
+            application/json:
+              schema:
+                type: object
+  /api/flights:
+    get:
+      tags: [PublicAPI]
+      summary: Get flights from Budapest
+      parameters:
+        - in: query
+          name: limit
+          schema: { type: integer }
+          description: max records
+      responses:
+        '200':
+          description: Flights response
+          content:
+            application/json:
+              schema:
+                type: object
+  /api/moon_phase:
+    get:
+      tags: [PublicAPI]
+      summary: Get moon phase data (Debrecen)
+      responses:
+        '200':
+          description: Moon phase data
+          content:
+            application/json:
+              schema:
+                type: object
+  /api/popular_stocks:
+    get:
+      tags: [PublicAPI]
+      summary: Get most popular stocks
+      parameters:
+        - in: query
+          name: symbols
+          schema:
+            type: array
+            items: { type: string }
+          style: form
+          explode: true
+          description: List of stock symbols
+      responses:
+        '200':
+          description: List of stock data
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+  /api/predict:
+    post:
+      tags: [Dashboard]
+      summary: Predict user interest with neural net
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+      responses:
+        '200':
+          description: Prediction
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  predictions:
+                    type: array
+                    items:
+                      type: integer
+        '400':
+          description: No input data
+        '500':
+          description: Error with the model
+  /api/recommendations:
+    get:
+      tags: [Events]
+      summary: Get AI recommendations based on user's events
+      responses:
+        '200':
+          description: AI event recommendations
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  events:
+                    type: string
+        '500':
+          description: Error with AI call
+
+  /api/home_data:
+    get:
+      tags: [Dashboard]
+      summary: Get dashboard API data (weather, meme, moon, stock, etc.)
+      responses:
+        '200':
+          description: Aggregated API data for homepage
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  apis:
+                    type: array
+                    items:
+                      type: object
+
+  /posts:
+    get:
+      tags: [Posts]
+      summary: Get latest posts
+      responses:
+        '200':
+          description: List of last 3 posts
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Post'
+    post:
+      tags: [Posts]
+      summary: Create a new post
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                text: { type: string }
+              required: [text]
+      responses:
+        '201':
+          description: Post created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Post'
+        '400':
+          description: Post text required
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error: { type: string }
+
+components:
+  schemas:
+    Note:
+      type: object
+      properties:
+        id: { type: integer }
+        title: { type: string }
+        content: { type: string }
+        timestamp: { type: string }
+    Event:
+      type: object
+      properties:
+        id: { type: integer }
+        title: { type: string }
+        description: { type: string }
+        notify: { type: boolean }
+        date: { type: string }
+        startTime: { type: string }
+        endTime: { type: string }
+    Post:
+      type: object
+      properties:
+        id: { type: integer }
+        text: { type: string }
+        user_id: { type: integer }
+        username: { type: string }
