@@ -52,7 +52,7 @@ login_manager.login_view = 'login_page'
 client = Client()
 cached_api_results = {}
 
-os.environ["GEMINI_API_KEY"] = "AIzaSyA_G6qXK2rwxohBHTvlse1fT5Eam_Rl-F4"
+os.environ["GEMINI_API_KEY"] = ""
 genai_client = genai.Client()
 
 
