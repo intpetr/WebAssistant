@@ -5,57 +5,93 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Settings</title>
     <link rel="stylesheet" href="SettingsStyle.css?v=1.1">
+    <script
+        src="https://kit.fontawesome.com/9a9b8af8bd.js"
+        crossorigin="anonymous"
+    ></script>
 </head>
 <body>
     <div id="settings-card">
         <h1 id="form-title">Visibility Settings</h1>
-        <p class="subtitle">Please select what you want to display on your Home page.</p>
+        <p class="subtitle">Please select what you want to display on your Home page, and arrange the order.</p>
 
         <div id="message-box" role="alert">
             <p id="message-text"></p>
          </div>
 
         <form id="settings-form">
-            <div class="api-list">
+            <div class="api-list" id="api-list">
                 
-                <div class="api-item">
+                <div class="api-item" data-key="weather">
                     <label for="api-weather">Weather Forecast</label>
                     <input type="checkbox" id="api-weather" name="api_preference" value="weather">
+                    <div class="reorder-controls">
+                        <button type="button" class="move-up-btn"><i class="fa-solid fa-arrow-up"></i></button>
+                        <button type="button" class="move-down-btn"><i class="fa-solid fa-arrow-down"></i></button>
+                    </div>
                  </div>
 
-                 <div class="api-item">
+                 <div class="api-item" data-key="currency">
                     <label for="api-currency">Currency Exchange</label>
                     <input type="checkbox" id="api-currency" name="api_preference" value="currency">
+                    <div class="reorder-controls">
+                        <button type="button" class="move-up-btn"><i class="fa-solid fa-arrow-up"></i></button>
+                        <button type="button" class="move-down-btn"><i class="fa-solid fa-arrow-down"></i></button>
+                    </div>
                   </div>
 
-                  <div class="api-item">
+                  <div class="api-item" data-key="stock">
                     <label for="api-stock">Stock Exchange</label>
                     <input type="checkbox" id="api-stock" name="api_preference" value="stock">
+                    <div class="reorder-controls">
+                        <button type="button" class="move-up-btn"><i class="fa-solid fa-arrow-up"></i></button>
+                        <button type="button" class="move-down-btn"><i class="fa-solid fa-arrow-down"></i></button>
+                    </div>
                    </div>
 
-                   <div class="api-item">
+                   <div class="api-item" data-key="news">
                         <label for="api-news">News</label>
                         <input type="checkbox" id="api-news" name="api_preference" value="news">
+                        <div class="reorder-controls">
+                            <button type="button" class="move-up-btn"><i class="fa-solid fa-arrow-up"></i></button>
+                            <button type="button" class="move-down-btn"><i class="fa-solid fa-arrow-down"></i></button>
+                        </div>
                     </div>
 
-                    <div class="api-item">
+                    <div class="api-item" data-key="meme">
                         <label for="api-meme">Daily Memes</label>
                         <input type="checkbox" id="api-meme" name="api_preference" value="meme">
+                        <div class="reorder-controls">
+                            <button type="button" class="move-up-btn"><i class="fa-solid fa-arrow-up"></i></button>
+                            <button type="button" class="move-down-btn"><i class="fa-solid fa-arrow-down"></i></button>
+                        </div>
                      </div>
 
-                     <div class="api-item">
+                     <div class="api-item" data-key="prayer">
                         <label for="api-prayer">Daily Prayer</label>
                         <input type="checkbox" id="api-prayer" name="api_preference" value="prayer">
+                        <div class="reorder-controls">
+                            <button type="button" class="move-up-btn"><i class="fa-solid fa-arrow-up"></i></button>
+                            <button type="button" class="move-down-btn"><i class="fa-solid fa-arrow-down"></i></button>
+                        </div>
                       </div>
 
-                      <div class="api-item">
+                      <div class="api-item" data-key="flight">
                         <label for="api-flight">Flight Tickets</label>
                         <input type="checkbox"  id="api-flight" name="api_preference" value="flight">
+                        <div class="reorder-controls">
+                            <button type="button" class="move-up-btn"><i class="fa-solid fa-arrow-up"></i></button>
+                            <button type="button" class="move-down-btn"><i class="fa-solid fa-arrow-down"></i></button>
+                        </div>
                        </div>
 
-                       <div class="api-item">
+                       <div class="api-item" data-key="moon">
                             <label for="api-moon">Moon Phases</label>
                             <input type="checkbox" id="api-moon" name="api_preference" value="moon">
+                            <div class="reorder-controls">
+                                <button type="button" class="move-up-btn"><i class="fa-solid fa-arrow-up"></i></button>
+                                <button type="button" class="move-down-btn"><i class="fa-solid fa-arrow-down"></i></button>
+                            </div>
                         </div>
             </div>
 
@@ -63,6 +99,7 @@
          </form>
      </div>
 
+    <script src="../api.js"></script>
     <script src="Settings.js?v=1.1"></script>
 </body>
 </html>

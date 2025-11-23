@@ -7,8 +7,7 @@
                         content="width=device-width, initial-scale=1.0"
                 />
                 <title>Home</title>
-                <!-- v=1.4 to match new JS/CSS -->
-                <link rel="stylesheet" href="HomeStyle.css?v=1.4" /> 
+                <link rel="stylesheet" href="HomeStyle.css?v=1.5" /> 
                 <script
                         src="https://kit.fontawesome.com/9a9b8af8bd.js"
                         crossorigin="anonymous"
@@ -26,6 +25,11 @@
                                         href="/Notes/Notes.html"
                                         class="movement-button"
                                         >Notes</a
+                                >
+                                <a
+                                        href="/Apis/"
+                                        class="movement-button"
+                                        >Apis</a
                                 >
                         </div>
                         <div class="nav-left">
@@ -93,11 +97,6 @@
 
                         <aside id="sidebar-content" class="sidebar-content">
                                 
-                                <!--
-                                  Currency card was removed from here. 
-                                  It is now rendered by Home.js into the api-cards-container.
-                                -->
-
                                 <div id="ai-recommendation-card" class="sidebar-card">
                                         <h2 class="card-title">
                                                 <i class="fa-solid fa-wand-magic-sparkles"></i>
@@ -112,7 +111,6 @@
                 </main>
 
                 <script src="../api.js"></script>
-                <!-- v=1.4 to match new JS/CSS -->
-                <script src="Home.js?v=1.4"></script>
+                <script src="Home.js?v=1.5"></script>
         </body>
 </html>

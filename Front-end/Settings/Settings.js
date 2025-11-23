@@ -8,6 +8,8 @@ const settingsForm = document.getElementById("settings-form");
 const saveButton = document.getElementById("save-button");
 const messageBox = document.getElementById("message-box");
 const messageText = document.getElementById("message-text");
+// *** NEW DOM REFERENCE ***
+const apiList = document.getElementById("api-list");
 
 /* --- UI Utility Functions --- */
 
@@ -42,17 +44,47 @@ function setButtonState(button, isLoading, originalText) {
   }
 }
 
+// *** NEW: Utility function to move list items ***
+function moveItem(item, direction) {
+  const parent = item.parentNode;
+  const items = Array.from(parent.querySelectorAll('.api-item'));
+  const currentIndex = items.indexOf(item);
+  let newIndex = currentIndex;
+
+  if (direction === 'up' && currentIndex > 0) {
+    newIndex = currentIndex - 1;
+  } else if (direction === 'down' && currentIndex < items.length - 1) {
+    newIndex = currentIndex + 1;
+  }
+
+  if (newIndex !== currentIndex) {
+    // Swap positions in the DOM
+    if (direction === 'up') {
+      parent.insertBefore(item, items[newIndex]);
+    } else if (direction === 'down') {
+      parent.insertBefore(item, items[newIndex].nextSibling);
+    }
+  }
+}
+
 /* --- Core Logic --- */
 
 /* Fetching the existing preferences of the user */
 async function loadInitialPreferences() {
-  const allCheckboxes = document.querySelectorAll(
-    'input[name="api_preference"]'
-  );
-
-  allCheckboxes.forEach((checkbox) => {
-    checkbox.checked = true;
+  const allItems = Array.from(document.querySelectorAll('.api-item'));
+  const apiList = document.getElementById("api-list");
+  
+  // Create a map for quick access
+  const itemMap = new Map();
+  allItems.forEach(item => {
+    itemMap.set(item.getAttribute('data-key'), item);
   });
+  
+  // Default: check all, keep current DOM order
+  allItems.forEach(item => {
+    item.querySelector('input[type="checkbox"]').checked = true;
+  });
+
 
   try {
     const response = await fetch(LOAD_ENDPOINT, {
@@ -66,27 +98,43 @@ async function loadInitialPreferences() {
     if (response.ok) {
       const data = await response.json();
       const userSettings = data.settings || {};
-      const enabledAPIs = userSettings.enabledApis || [];
-
-      if (enabledAPIs.length > 0) {
-        allCheckboxes.forEach((checkbox) => {
-          checkbox.checked = false;
-        });
-
-        enabledAPIs.forEach((apiValue) => {
-          const checkbox = document.getElementById(`api-${apiValue}`);
-          if (checkbox) {
-            checkbox.checked = true;
-          }
+      // savedOrder is an array of API keys in the preferred order
+      const savedOrder = userSettings.enabledApis || [];
+      
+      // 1. Clear checks initially (if saved settings exist)
+      if (savedOrder.length > 0) {
+        allItems.forEach((item) => {
+          item.querySelector('input[type="checkbox"]').checked = false;
         });
       } else {
-        console.log(
-          "User has saved settings, but the list is empty. Showing all checked by default."
-        );
+        console.log("User has no saved settings. Showing all checked by default.");
+        return; // Use default order if no settings
       }
+
+      // 2. Determine which APIs are *not* in the saved order (for sorting purposes)
+      const disabledApis = allItems.filter(item => !savedOrder.includes(item.getAttribute('data-key')));
+      
+      // 3. Reorder the DOM based on the saved preference
+      apiList.innerHTML = ''; // Clear the list
+      
+      // Insert saved/enabled items in the correct order
+      savedOrder.forEach(apiValue => {
+        const item = itemMap.get(apiValue);
+        if (item) {
+          // Re-check the checkbox for enabled items
+          item.querySelector('input[type="checkbox"]').checked = true;
+          apiList.appendChild(item);
+        }
+      });
+      
+      // Append the disabled items (order doesn't matter much here)
+      disabledApis.forEach(item => {
+        apiList.appendChild(item);
+      });
+
     } else if (response.status === 404 || response.status === 401) {
       console.warn(
-        "Could not load preferences (401/404). Defaulting to all checked"
+        "Could not load preferences (401/404). Defaulting to all checked and original order."
       );
     } else {
       console.error(
@@ -96,7 +144,7 @@ async function loadInitialPreferences() {
     }
   } catch (error) {
     console.error(
-      `Network error during initial load. Defaulting to all checked: ${error}`
+      `Network error during initial load. Defaulting to all checked and original order: ${error}`
     );
   }
 }
@@ -106,16 +154,21 @@ async function handleSavePreferences(e) {
   e.preventDefault();
 
   const originalText = saveButton.textContent;
+  // *** MODIFIED LOGIC: Get order from DOM, not just checked status ***
   const enabledApis = [];
-  const checkboxes = settingsForm.querySelectorAll(
-    'input[name="api_preference"]:checked'
-  );
-
-  checkboxes.forEach((checkbox) => {
-    enabledApis.push(checkbox.value);
+  
+  // Iterate over all list items in their current DOM order
+  const allApiItems = document.querySelectorAll('.api-item');
+  allApiItems.forEach((item) => {
+    const checkbox = item.querySelector('input[name="api_preference"]');
+    if (checkbox && checkbox.checked) {
+      // The value of the checkbox is the API key
+      enabledApis.push(checkbox.value); 
+    }
   });
 
   const payload = {
+    // The enabledApis array now implicitly carries the user's preferred order
     settings: { enabledApis: enabledApis },
   };
 
@@ -166,4 +219,19 @@ async function handleSavePreferences(e) {
 document.addEventListener("DOMContentLoaded", () => {
   loadInitialPreferences();
   settingsForm.addEventListener("submit", handleSavePreferences);
+  
+  // *** NEW: Event delegation for reorder buttons ***
+  apiList.addEventListener('click', (e) => {
+    const target = e.target.closest('.move-up-btn, .move-down-btn');
+    if (!target) return;
+    
+    e.preventDefault();
+    const apiItem = target.closest('.api-item');
+    
+    if (target.classList.contains('move-up-btn')) {
+      moveItem(apiItem, 'up');
+    } else if (target.classList.contains('move-down-btn')) {
+      moveItem(apiItem, 'down');
+    }
+  });
 });

@@ -5,6 +5,8 @@ const LOGOUT_ENDPOINT = `${api}/api/logout`;
 // --- NEW ENDPOINTS ---
 const RECOMMENDATION_ENDPOINT = `${api}/api/recommendations`;
 const POSTS_ENDPOINT = `${api}/api/posts`;
+const CARD_ACTIONS_ENDPOINT = `${api}/api/card_actions`;
+const CUSTOM_EVENT_ENDPOINT = `${api}/api/custom_event`;
 
 
 // DOM element references
@@ -14,8 +16,6 @@ const logoutBtn = document.getElementById("logout-btn");
 // --- NEW DOM REFERENCES ---
 const recommendationContent = document.getElementById("ai-recommendation-content");
 const postsList = document.getElementById("posts-list");
-// --- REMOVED: Reference for the old currency card ---
-// const currencyCardContent = document.getElementById("currency-card-content"); 
 // --- NEW DOM REFERENCES FOR CREATE POST ---
 const createPostForm = document.getElementById("create-post-form");
 const postTextarea = document.getElementById("post-textarea");
@@ -25,8 +25,6 @@ const postMessageBox = document.getElementById("post-message-box");
 
 
 /* Data Rendering Functions */
-
-// --- REMOVED: renderCurrencyCard function is no longer needed ---
 
 /**
  * Creates HTML content for the main dashboard cards.
@@ -51,7 +49,6 @@ function createCardContent(key, data) {
                 <p> Wind direction: ${current.winddirection} °</p>
             `;
 
-        // *** NEW: "currency" case added back ***
         case "currency":
             if (data.error || !data.success) {
                 return `<p class="error-message">Error fetching currency data: ${data.error || 'API request failed.'}</p>`;
@@ -92,7 +89,6 @@ function createCardContent(key, data) {
             }).join("");
 
             // 4. Build the final card content
-            // This HTML will be placed inside the .card-content div
             return `
                 <p class="currency-base-text">
                     Base Currency: <strong class="base-value">${base}</strong>
@@ -104,10 +100,8 @@ function createCardContent(key, data) {
                     Last Updated: ${formattedDate}
                 </div>
             `;
-        // *** END OF NEW "currency" case ***
 
         case "meme":
-            // The 'data' object itself is the meme data: { title, url, ... }
             if (data && data.url) {
                 return `<img src="${data.url}" alt="${
                     data.title || "Daily Meme"
@@ -174,20 +168,16 @@ function createCardContent(key, data) {
                     } / Moonrise: ${data.moonrise || "N/A"}</p>
             `;
 
-        // *** MODIFIED: Updated flight card logic ***
         case "flight":
             if (data.data && data.data.length > 0) {
-                // Get the top 3 flights as requested
                 const topFlights = data.data.slice(0, 3);
                 
-                // Map them to HTML elements
                 const flightListHtml = topFlights.map(flight => {
                     const airline = flight.airline.name || "N/A";
                     const flightNum = flight.flight.iata || flight.flight.number || "N/A";
                     const destination = flight.arrival.airport || "N/A";
                     const destIata = flight.arrival.iata || "";
 
-                    // Format scheduled time (e.g., "2025-11-17T06:20:00+00:00")
                     let scheduledTime = "N/A";
                     if (flight.departure.scheduled) {
                         try {
@@ -208,12 +198,11 @@ function createCardContent(key, data) {
                             <p class="flight-time">Scheduled: ${scheduledTime}</p>
                         </div>
                     `;
-                }).join(""); // Join all flight items together
+                }).join("");
 
                 return flightListHtml;
             }
             return `<p>No flight data available.</p>`;
-        // *** END OF MODIFICATION ***
 
         case "prayer":
             return `<p>Daily prayer feature is enabled but not yet connected to a data source.</p>`;
@@ -227,19 +216,98 @@ function createCardContent(key, data) {
 function renderCard(apiItem) {
     const card = document.createElement("div");
     card.className = "api-card";
-    // --- NEW: Add a data-key attribute for styling ---
     card.setAttribute('data-key', apiItem.key);
 
     const content = createCardContent(apiItem.key, apiItem.data);
+
+    const actionsId = `actions-${apiItem.key}`;
 
     card.innerHTML = `
             <h2 class="card-title">${apiItem.title}</h2>
             <div class="card-content">
                 ${content}
             </div>
+            <div id="${actionsId}" class="card-actions-section">
+                <p class="loading-actions">Loading actions...</p>
+            </div>
     `;
     cardsContainer.appendChild(card);
+
+    loadCardActions(apiItem.key, actionsId);
 }
+
+async function loadCardActions(apiKey, containerId) {
+    const container = document.getElementById(containerId);
+    if (!container) return;
+
+    try {
+        const response = await fetch(`${CARD_ACTIONS_ENDPOINT}?api_key=${apiKey}`, {
+            method: "GET",
+            credentials: "include"
+        });
+
+        if (!response.ok) {
+            container.innerHTML = "";
+            return;
+        }
+
+        const data = await response.json();
+        const actions = data.actions || [];
+
+        if (actions.length === 0) {
+            container.innerHTML = "";
+            return;
+        }
+
+        let buttonsHtml = '<hr style="margin: 15px 0; border: 0; border-top: 1px solid #ccc;">';
+        buttonsHtml += '<div style="display: flex; gap: 10px; flex-wrap: wrap;">';
+        
+        actions.forEach(action => {
+            const safeName = action.name.replace(/'/g, "\\'");
+            const safeKey = apiKey.replace(/'/g, "\\'");
+            
+            buttonsHtml += `
+                <button 
+                    class="action-button secondary-button" 
+                    title="${action.description}"
+                    onclick="triggerCustomEvent('${safeKey}', '${safeName}')"
+                    style="font-size: 0.8em; padding: 5px 10px;"
+                >
+                    ${action.name}
+                </button>
+            `;
+        });
+        
+        buttonsHtml += '</div>';
+        container.innerHTML = buttonsHtml;
+
+    } catch (error) {
+        console.error(`Error loading actions for ${apiKey}:`, error);
+        container.innerHTML = "";
+    }
+}
+
+window.triggerCustomEvent = async function(apiKey, actionName) {
+    try {
+        const response = await fetch(CUSTOM_EVENT_ENDPOINT, {
+            method: "POST",
+            credentials: "include",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ 
+                api_key: apiKey, 
+                action_name: actionName 
+            }),
+        });
+
+        if (response.ok) {
+            // Intentionally empty - no popup
+        } else {
+            console.error("Failed to send custom event");
+        }
+    } catch (error) {
+        console.error("Error sending custom event:", error);
+    }
+};
 
 // Fetching user settings and data from the backend
 async function loadDashboardData() {
@@ -265,10 +333,6 @@ async function loadDashboardData() {
 
         cardsContainer.innerHTML = "";
         
-        // --- *** MODIFIED LOGIC *** ---
-        // Reverted to the simple version.
-        // The 'currency' card is now rendered just like all other cards.
-        
         if (apiResults.length === 0) {
             cardsContainer.innerHTML = `
                 <p class="loading-message">
@@ -277,18 +341,15 @@ async function loadDashboardData() {
                     to choose what you want to see.
                 </p>`;
         } else {
-            // Render all cards, including the currency card
             apiResults.forEach(renderCard);
         }
-        // --- *** END OF MODIFIED LOGIC *** ---
 
         handleAuthStatus(true);
 
     } catch (error) {
         console.error("Error loading dashboard data", error);
         cardsContainer.innerHTML = `<p class="loading-message error-message">Failed to load dashboard data. Network error or server issue.</p>`;
-        // --- REMOVED: No longer need to update separate currency card on error ---
-        handleAuthStatus(false); // Assume auth failed if network error
+        handleAuthStatus(false);
     }
 }
 
@@ -314,7 +375,6 @@ async function loadAiRecommendation() {
 
         const data = await response.json();
         
-        // Format the plain text response with line breaks
         const formattedText = data.events.replace(/\n/g, '<br>');
         recommendationContent.innerHTML = `<p>${formattedText}</p>`;
 
@@ -335,7 +395,6 @@ function showPostMessage(message, type = "error") {
     postMessageBox.textContent = message;
     postMessageBox.className = `message-${type} show`;
 
-    // Hide after 5 seconds
     setTimeout(() => {
         postMessageBox.className = "hidden";
         postMessageBox.textContent = "";
@@ -344,7 +403,7 @@ function showPostMessage(message, type = "error") {
 
 // --- NEW: Handle Create Post ---
 async function handleCreatePost(e) {
-    e.preventDefault(); // Prevent default form submission
+    e.preventDefault();
     if (!postTextarea || !postSubmitBtn) return;
 
     const text = postTextarea.value.trim();
@@ -370,10 +429,9 @@ async function handleCreatePost(e) {
             throw new Error(errorData.error || `Server error: ${response.status}`);
         }
 
-        // Post created successfully
         showPostMessage("Post created successfully!", "success");
-        postTextarea.value = ""; // Clear the textarea
-        loadPosts(); // Refresh the posts list
+        postTextarea.value = "";
+        loadPosts();
 
     } catch (error) {
         console.error("Error creating post:", error);
@@ -412,11 +470,9 @@ async function loadPosts() {
             return;
         }
 
-        // Build HTML for the top posts, now including the 'likes' count
         postsList.innerHTML = posts.map(post => `
             <div class="post-item" data-post-id="${post.id}">
                 <div class="post-details">
-                    <!-- MODIFIED: Turned the username into a link -->
                     <a href="/users/${post.username}" class="post-username-link">
                         <span class="post-username">${post.username}</span>
                     </a>
@@ -442,19 +498,17 @@ async function handleLikeClick(e) {
     const postId = likeButton.dataset.postId;
     const isLiked = likeButton.dataset.liked === 'true';
 
-    // If already liked in this session, do nothing.
     if (isLiked) {
         console.log("Already liked this post in this session.");
         return;
     }
 
-    // Disable button to prevent double-clicking
     likeButton.disabled = true;
 
     try {
         const response = await fetch(`${POSTS_ENDPOINT}/${postId}/like`, {
             method: "POST",
-            credentials: "include", // Send cookies
+            credentials: "include",
             headers: {
                 "Content-Type": "application/json"
             }
@@ -465,21 +519,15 @@ async function handleLikeClick(e) {
             throw new Error(errorData.error || `Server error: ${response.status}`);
         }
 
-        // The backend returns the updated post object
         const updatedPost = await response.json();
 
-        // Update the button visually to show it's "liked"
         likeButton.dataset.liked = 'true';
         likeButton.innerHTML = `<i class="fa-solid fa-heart"></i> ${updatedPost.likes}`;
         likeButton.style.color = 'var(--white)';
         likeButton.style.backgroundColor = 'var(--error-red)';
         
-        // Keep the button disabled for this session
-        // likeButton.disabled = false; // <-- We keep it disabled
-
     } catch (error) {
         console.error(`Failed to like post ${postId}:`, error);
-        // Re-enable button if the request failed so user can try again
         likeButton.disabled = false;
     }
 }
@@ -488,11 +536,9 @@ async function handleLikeClick(e) {
 // Function to handle showing/hiding the Login/Register button
 function handleAuthStatus(isLoggedIn) {
     if (isLoggedIn) {
-        // Hide Login/Register, Show Logout
         if (loginRegisterBtn) loginRegisterBtn.classList.add("hidden");
         if (logoutBtn) logoutBtn.classList.remove("hidden");
     } else {
-        // Show Login/Register, Hide Logout
         if (loginRegisterBtn)
             loginRegisterBtn.classList.remove("hidden");
         if (logoutBtn) logoutBtn.classList.add("hidden");
@@ -513,22 +559,18 @@ async function handleLogout() {
 
 // Initialization
 document.addEventListener("DOMContentLoaded", () => {
-    // 1. Load all dynamic content concurrently
-    loadDashboardData(); // This will now also trigger renderCurrencyCard
+    loadDashboardData();
     loadAiRecommendation();
     loadPosts();
 
-    // 2. Attach logout listener
     if (logoutBtn) {
         logoutBtn.addEventListener("click", handleLogout);
     }
 
-    // 3. Attach like button listener (using event delegation)
     if (postsList) {
         postsList.addEventListener('click', handleLikeClick);
     }
 
-    // --- NEW: Attach Create Post Listeners ---
     if (createPostForm) {
         createPostForm.addEventListener("submit", handleCreatePost);
     }

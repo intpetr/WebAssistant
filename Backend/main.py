@@ -1,5 +1,7 @@
 import threading
 
+from google import genai
+
 from ollama import Client
 from datetime import datetime, time
 from flask import Flask, request, jsonify, send_from_directory, redirect, url_for
@@ -7,7 +9,7 @@ from flask_sqlalchemy import SQLAlchemy
 import logging
 import os
 from flask_cors import CORS
-from Models import User, db, Post
+from Models import User, db, Post, PersonalApi
 from Models import Event
 from flask_login import LoginManager, login_user, login_required, logout_user, current_user
 from Models import Note
@@ -25,6 +27,8 @@ import sklearn
 import schedule
 import time
 import threading
+import json
+import requests
 
 print(sklearn.__version__)
 
@@ -48,6 +52,9 @@ login_manager.login_view = 'login_page'
 client = Client()
 cached_api_results = {}
 
+os.environ["GEMINI_API_KEY"] = "AIzaSyA_G6qXK2rwxohBHTvlse1fT5Eam_Rl-F4"
+genai_client = genai.Client()
+
 
 @login_manager.user_loader
 def load_user(user_id):
@@ -62,16 +69,10 @@ def unauthorized():
     return redirect(url_for('login_page'))
 
 
-# --- NEW ---
-# Page-serving route for the profile page
 @app.route('/users/<username>')
 @login_required
 def profile_page(username):
-    # It just serves the HTML file. The JS in that file will fetch the data.
     return send_from_directory(app.static_folder, 'Profile/Profile.html')
-
-
-# --- END NEW ---
 
 
 @app.route('/')
@@ -91,7 +92,6 @@ def home_page():
 def login_page():
     if current_user.is_authenticated:
         pass
-        # return redirect(url_for('home_page'))
     return send_from_directory(app.static_folder, 'Login/Login.html')
 
 
@@ -111,6 +111,13 @@ def calendar_page():
 @login_required
 def settings_page():
     return send_from_directory(app.static_folder, 'Settings/Settings.html')
+
+
+# --- NEW ROUTE FOR APIS PAGE ---
+@app.route('/Apis/')
+@login_required
+def apis_page():
+    return send_from_directory(app.static_folder, 'Apis/Apis.html')
 
 
 @app.route('/api/register', methods=['POST'])
@@ -413,7 +420,6 @@ def predict():
     preprocessor = joblib.load(PREPROCESSOR_PATH)
     state_dict = torch.load(MODEL_PATH, map_location=torch.device('cpu'))
 
-    # Determine input dimension from the saved state_dict
     if 'layer1.weight' not in state_dict:
         return jsonify({"error": "Invalid model file"}), 500
     input_dim = state_dict['layer1.weight'].shape[1]
@@ -441,20 +447,16 @@ def predict():
 
 @app.route('/api/recommendations', methods=['GET'])
 @login_required
-def get_recommendations():  # Renamed function for clarity
+def get_recommendations():
     if request.method == 'GET':
         try:
-            # Query the database for the user's *existing* recommendation
             recommendation = AIRecommendation.query.filter_by(user_id=current_user.id).first()
 
             if recommendation:
-                # Found an existing recommendation
                 response_text = recommendation.text
             else:
-                # No recommendation found, provide a default message
                 response_text = "Your personalized recommendations are in the making. Check back later!"
 
-            # The frontend JS (Home.js) expects a JSON key named "events"
             return jsonify({"events": response_text}), 200
 
         except Exception as e:
@@ -470,8 +472,6 @@ def get_ai_recommendations(raw_events):
         model="phi3:mini",
         messages=[
             {"role": "system",
-                #"content": "Construct a response based on these events: " + raw_events + " create a bullet point list with two blank lines between each element that gives me new just 3 activity ideas. also elaborate on the recommended activities, also provide a reason like: based on your event history you usually attend social events at this time (Use singular second person pronoung - you). No more than 3 list elements and 7 words in a sentence. Put 2 blank lines between activity"},
-            #"content": "Construct a completely new, exciting activity recommendation list STRICTLY consisting of 3 elements with reasons send it as reply and do not send anytihng else. Take this previous hisotry into consideration: " + raw_events + "each element has to contain activity name and provide a short reason like: based on your event history you usually attend social events at this time (Use singular second person pronoung - you). Keep everything it the point, short, compact, few words, format it like a bullet point list elements leave empty lines between recommendations with nothing written in them just empty lines for readability between all list elements and only return the recommendation NOTHING about empty spaces, restrictions. MAKE sure it does not contain anything like DO NOT INCLUDE THE RESTRICTIONS IN THE OUTPUT "}
              "content": "You are a recommendation assistant. Your task is to provide 3 activity recommendations based on user history. You MUST follow these rules:\n"
                         "1. Provide EXACTLY 3 recommendations.\n"
                         "2. Each recommendation must be a single bullet point.\n"
@@ -484,13 +484,10 @@ def get_ai_recommendations(raw_events):
                                                         " Go Hiking: Explore a new trail. You often enjoy nature activities. 'NN'"
                                                         " Visit a Museum: See the new art exhibit. You attended a gallery last month. 'NN'"
                                                         " Try a Cooking Class: Learn a new recipe. You seem to enjoy food-related events. 'NN'"}
-            # {"role": "user", "content": raw_events}
         ]
     )
 
-    #final_response = final_response + '\n ' + '\n' + response['message']['content']
-
-    return response['message']['content'].replace("NN",new_line)
+    return response['message']['content'].replace("NN", new_line)
 
 
 def update_all_recommendations():
@@ -512,7 +509,7 @@ def update_all_recommendations():
             rec = AIRecommendation.query.filter_by(user_id=user.id).first()
 
             if rec:
-                rec.text = new_rec  # update existing record
+                rec.text = new_rec
                 print(f"Updated recommendation for {user.username}")
             else:
                 rec = AIRecommendation(user_id=user.id, text=new_rec)
@@ -528,50 +525,159 @@ def update_all_recommendations():
 @login_required
 def home_data():
     print('Constructing api call responses needed for the homepage')
-    # 1. Get the user's settings (or use defaults)
     user = current_user
     user_settings_obj = getattr(user, 'settings', None)
     settings = user_settings_obj.settings if user_settings_obj else {}
 
     api_results = []
 
-    # 2. Check each setting and call the corresponding API
-    # The 'key' (e.g., "weather") MUST match the 'case' in your frontend JavaScript
+    default_apis_order = ['weather', 'currency', 'stock', 'news', 'meme', 'prayer', 'flight', 'moon']
 
-    # --- Example: Weather ---
-    # NOTE: Adjust 'weather_enabled' to match the key you save in your user settings
-    if settings.get('weather_enabled', True):
+    enabled_apis_to_load = settings.get('enabledApis', default_apis_order)
 
-        api_results.append( cached_api_results['weather'])
+    for api_key in enabled_apis_to_load:
 
+        if api_key == 'prayer':
+            api_results.append({
+                "key": "prayer",
+                "title": "Daily Prayer",
+                "data": {"message": "Daily prayer feature is enabled but not yet connected to a data source."}
+            })
+            continue
 
-    # --- Example: Currency ---
-    if settings.get('currency_enabled', True):
-        api_results.append(cached_api_results['currency'])
-
-    # --- Example: Meme ---
-    if settings.get('meme_enabled', True):
-        api_results.append(cached_api_results['meme'])
-
-
-    if settings.get('stock_enabled', True):
-        api_results.append(cached_api_results['stock'])
-
-
-    # --- Example: News ---
-    if settings.get('news_enabled', True):
-        api_results.append(cached_api_results['news'])
-
-
-    # --- Example: Moon Phase ---
-    if settings.get('moon_enabled', True):
-        api_results.append(cached_api_results['moon'])
-
-    if settings.get('flight_enabled', True):
-        api_results.append(cached_api_results['flight'])
+        if api_key in cached_api_results:
+            api_results.append(cached_api_results[api_key])
 
     print('returned all api data')
     return jsonify({"apis": api_results})
+
+
+@app.route('/api/card_actions', methods=['GET'])
+@login_required
+def get_card_actions():
+    api_key = request.args.get('api_key')
+    if not api_key:
+        return jsonify({"error": "Missing 'api_key' parameter"}), 400
+
+    cached_data = cached_api_results.get(api_key, {})
+
+    personal_api = PersonalApi.query.filter_by(user_id=current_user.id).first()
+    apis_string = personal_api.apistring if personal_api else "No personal APIs configured."
+
+    prompt = (
+        f"Analyze the following JSON data for a dashboard card titled '{api_key}': {json.dumps(cached_data)}. "
+        f"The user also has these personal APIs configured: '{apis_string}'. "
+        "Suggest between 0 and 3 short, useful action buttons for the user based specifically on this data and their available APIs. "
+        "If the user's personal APIs can be used to enhance the card data or trigger a related action, prioritize that. "
+        "Return ONLY a raw JSON array of objects. Each object must have a 'name' (button label, max 15 chars) "
+        "and a 'description' (brief explanation of why it is useful, max 10 words). "
+        "If the data suggests no specific actions, return an empty list []. "
+        "Do not include any markdown formatting or extra text."
+    )
+
+    try:
+        response = genai_client.models.generate_content(
+            model="gemini-2.5-flash",
+            contents=prompt
+        )
+        text_response = response.text.strip()
+        if text_response.startswith("```json"):
+            text_response = text_response[7:-3].strip()
+        elif text_response.startswith("```"):
+            text_response = text_response[3:-3].strip()
+
+        actions = json.loads(text_response)
+        if not isinstance(actions, list):
+            actions = []
+    except Exception as e:
+        print(f"Error generating actions for {api_key}: {e}")
+        actions = []
+
+    return jsonify({"actions": actions[:3]})
+
+
+@app.route('/api/custom_event', methods=['POST'])
+@login_required
+def custom_event():
+    data = request.get_json()
+    api_key = data.get('api_key')
+    action_name = data.get('action_name')
+
+    if not api_key or not action_name:
+        return jsonify({"error": "Missing 'api_key' or 'action_name'"}), 400
+
+    print(f"--- Custom Event Received: Card='{api_key}', Button='{action_name}' ---")
+
+    personal_api = PersonalApi.query.filter_by(user_id=current_user.id).first()
+    apis_string = personal_api.apistring if personal_api else "No personal APIs configured."
+
+    prompt = (
+        f"The user clicked the button '{action_name}' on the dashboard card '{api_key}'. "
+        f"The user has the following personal APIs configured: '{apis_string}'. "
+        "Your task is to craft a Python script that uses the 'requests' library to execute an API call that fulfills this action. "
+        "Use the provided personal API information to construct the URL, headers, and body correctly. "
+        "Return ONLY the executable Python code. Do not include any markdown, explanations, or comments. "
+        "Ensure the code imports 'requests' and prints the response status code and text."
+    )
+
+    try:
+        response = genai_client.models.generate_content(
+            model="gemini-2.5-flash",
+            contents=prompt
+        )
+
+        generated_code = response.text.strip()
+        if generated_code.startswith("```python"):
+            generated_code = generated_code[9:-3].strip()
+        elif generated_code.startswith("```"):
+            generated_code = generated_code[3:-3].strip()
+
+        print("--- Executing Generated Code ---")
+        print(generated_code)
+
+        exec_globals = {}
+        exec(generated_code, exec_globals)
+
+        return jsonify({"message": f"Custom event '{action_name}' processed and API call executed."}), 200
+
+    except Exception as e:
+        print(f"Error executing custom event action: {e}")
+        return jsonify({"error": f"Failed to execute action: {str(e)}"}), 500
+
+
+# --- NEW API ENDPOINT FOR UPDATING PERSONAL API STRING ---
+@app.route('/api/update_personal_api', methods=['POST'])
+@login_required
+def update_personal_api():
+    data = request.get_json()
+    new_text = data.get('text')
+
+    if not new_text:
+        return jsonify({"error": "No text provided"}), 400
+
+    # Fetch existing record
+    personal_api = PersonalApi.query.filter_by(user_id=current_user.id).first()
+
+    if personal_api:
+        # Concatenate to existing string
+        if personal_api.apistring:
+            personal_api.apistring += f", {new_text}"
+        else:
+            personal_api.apistring = new_text
+    else:
+        # Create new record
+        personal_api = PersonalApi(user_id=current_user.id, apistring=new_text)
+        db.session.add(personal_api)
+
+    try:
+        db.session.commit()
+        return jsonify({
+            "message": "API string updated successfully",
+            "redirect": url_for('home_page')
+        }), 200
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({"error": str(e)}), 500
 
 
 def cache_api_responses():
@@ -583,16 +689,16 @@ def cache_api_responses():
         app.logger.error(f"Failed to fetch weather: {e}")
         cached_api_results['weather'] = {"key": "weather", "title": "Current Weather", "data": {"error": str(e)}}
 
-    # --- Example: Currency ---
     if True:
         try:
             currency_data = api_calls.ApiCalls.get_currency()
-            cached_api_results['currency'] = {"key": "currency", "title": "Currency (USD to HUF)", "data": currency_data}
+            cached_api_results['currency'] = {"key": "currency", "title": "Currency (USD to HUF)",
+                                              "data": currency_data}
         except Exception as e:
             app.logger.error(f"Failed to fetch currency: {e}")
-            cached_api_results['currency'] = {"key": "currency", "title": "Currency (USD to HUF)", "data": {"error": str(e)}}
+            cached_api_results['currency'] = {"key": "currency", "title": "Currency (USD to HUF)",
+                                              "data": {"error": str(e)}}
 
-    # --- Example: Meme ---
     if True:
         try:
             meme_data = api_calls.ApiCalls.get_meme()
@@ -601,17 +707,14 @@ def cache_api_responses():
             app.logger.error(f"Failed to fetch meme: {e}")
             cached_api_results['meme'] = {"key": "meme", "title": "Daily Meme", "data": {"error": str(e)}}
 
-    # --- Example: Stock ---
     if True:
         try:
-            # Using your popular_stocks function for this
             stock_data = api_calls.ApiCalls.get_most_popular_stocks(symbols=['AAPL', 'MSFT', 'GOOGL'])
             cached_api_results['stock'] = {"key": "stock", "title": "Popular Stocks", "data": stock_data}
         except Exception as e:
             app.logger.error(f"Failed to fetch stock: {e}")
             cached_api_results['stock'] = {"key": "stock", "title": "Popular Stocks", "data": {"error": str(e)}}
 
-    # --- Example: News ---
     if True:
         try:
             news_data = api_calls.ApiCalls.get_latest_news(query='technology', country='hu', language='en')
@@ -620,7 +723,6 @@ def cache_api_responses():
             app.logger.error(f"Failed to fetch news: {e}")
             cached_api_results['news'] = {"key": "news", "title": "Tech News", "data": {"error": str(e)}}
 
-    # --- Example: Moon Phase ---
     if True:
         try:
             moon_data = api_calls.ApiCalls.get_moon_data_debrecen()
@@ -629,7 +731,6 @@ def cache_api_responses():
             app.logger.error(f"Failed to fetch moon: {e}")
             cached_api_results['moon'] = {"key": "moon", "title": "Moon Phase", "data": {"error": str(e)}}
 
-    # --- Example: Flight Data ---
     if True:
         try:
             flight_data = api_calls.ApiCalls.get_flights_from_budapest(limit=5)
@@ -644,30 +745,21 @@ def cache_api_responses():
 def run_scheduler():
     schedule.every(30).minutes.do(update_all_recommendations)
 
-    # Optional: run task immediately on startup
     update_all_recommendations()
 
     while True:
         schedule.run_pending()
-        time.sleep(100)  # check every 10 seconds
+        time.sleep(100)
 
 
 from flask import request, jsonify, abort
 from flask_login import login_required, current_user
-from Models import db, Post, User  # Make sure to import Post and User
+from Models import db, Post, User
 
 
-# Note: These routes assume you have added:
-# likes = db.Column(db.Integer, nullable=False, default=0)
-# to your Post model in Models.py
-
-# --- CREATE and READ Posts ---
 @app.route('/api/posts', methods=['GET', 'POST'])
 @login_required
 def handle_posts():
-    """
-    Handles creating a new post (POST) or getting all posts (GET).
-    """
     if request.method == 'POST':
         data = request.get_json()
         text = data.get('text')
@@ -675,13 +767,11 @@ def handle_posts():
         if not text:
             return jsonify({'error': 'Post text is required.'}), 400
 
-        # Create new post
         try:
             post = Post(user_id=current_user.id, text=text, likes=0)
             db.session.add(post)
             db.session.commit()
 
-            # Return the full post object using the to_dict method
             return jsonify(post.to_dict()), 201
 
         except Exception as e:
@@ -690,16 +780,9 @@ def handle_posts():
             return jsonify({'error': 'Failed to create post.'}), 500
 
     elif request.method == 'GET':
-        """
-        Gets the latest posts.
-        Updated to use the model's to_dict() method.
-        """
         try:
-            # Get latest 10 posts, newest first
             latest_posts = Post.query.order_by(Post.id.desc()).limit(10).all()
 
-            # Use to_dict() to serialize each post
-            # This assumes your Post.to_dict() returns username and likes
             result = [post.to_dict() for post in latest_posts]
 
             return jsonify(result), 200
@@ -709,27 +792,21 @@ def handle_posts():
             return jsonify({'error': 'Failed to fetch posts.'}), 500
 
 
-# --- UPDATE (Like) a Post ---
 @app.route('/api/posts/<int:post_id>/like', methods=['POST'])
 @login_required
 def like_post(post_id):
-    """
-    Increments the like count for a specific post.
-    """
     try:
         post = db.session.get(Post, post_id)
 
         if not post:
             return jsonify({'error': 'Post not found.'}), 404
 
-        # Increment the likes
         if post.likes is None:
             post.likes = 0
         post.likes += 1
 
         db.session.commit()
 
-        # Return the updated post object
         return jsonify(post.to_dict()), 200
 
     except Exception as e:
@@ -738,21 +815,15 @@ def like_post(post_id):
         return jsonify({'error': 'Failed to like post.'}), 500
 
 
-# --- UPDATE (Edit Text) of a Post ---
 @app.route('/api/posts/<int:post_id>', methods=['PUT'])
 @login_required
 def update_post(post_id):
-    """
-    Updates the text of a specific post.
-    Only the author of the post can update it.
-    """
     try:
         post = db.session.get(Post, post_id)
 
         if not post:
             return jsonify({'error': 'Post not found.'}), 404
 
-        # Check authorization
         if post.user_id != current_user.id:
             return jsonify({'error': 'Unauthorized to edit this post.'}), 403
 
@@ -762,7 +833,6 @@ def update_post(post_id):
         if not text:
             return jsonify({'error': 'Post text cannot be empty.'}), 400
 
-        # Update the text
         post.text = text
         db.session.commit()
 
@@ -774,25 +844,18 @@ def update_post(post_id):
         return jsonify({'error': 'Failed to update post.'}), 500
 
 
-# --- DELETE a Post ---
 @app.route('/api/posts/<int:post_id>', methods=['DELETE'])
 @login_required
 def delete_post(post_id):
-    """
-    Deletes a specific post.
-    Only the author of the post can delete it.
-    """
     try:
         post = db.session.get(Post, post_id)
 
         if not post:
             return jsonify({'error': 'Post not found.'}), 404
 
-        # Check authorization
         if post.user_id != current_user.id:
             return jsonify({'error': 'Unauthorized to delete this post.'}), 403
 
-        # Delete the post
         db.session.delete(post)
         db.session.commit()
 
@@ -804,35 +867,25 @@ def delete_post(post_id):
         return jsonify({'error': 'Failed to delete post.'}), 500
 
 
-# --- NEW ---
-# API route to get a user's profile info and all their posts
 @app.route('/api/users/<username>', methods=['GET'])
 @login_required
 def get_user_profile(username):
-    # Find the user by username
     user = User.query.filter_by(username=username).first()
     if not user:
         return jsonify({"error": "User not found"}), 404
 
-    # Get all posts for that user, newest first
     posts = Post.query.filter_by(user_id=user.id).order_by(Post.id.desc()).all()
 
-    # --- MODIFICATION: Get user settings for interests ---
     enabled_apis = []
-    # Check if the user has settings and if that settings object has the json blob
     if user.settings and user.settings.settings:
-        # Get the 'enabledApis' list, default to empty list if not found
         enabled_apis = user.settings.settings.get('enabledApis', [])
-    # --- END MODIFICATION ---
 
-    # Serialize the data
     user_data = {
         "id": user.id,
         "username": user.username,
         "email": user.email,
-        "enabledApis": enabled_apis  # <-- MODIFIED: Add interests list to response
+        "enabledApis": enabled_apis
     }
-    # Use the existing to_dict() method for consistency
     posts_data = [post.to_dict() for post in posts]
 
     return jsonify({"user": user_data, "posts": posts_data}), 200

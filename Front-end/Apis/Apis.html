@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Configure APIs</title>
+    <link rel="stylesheet" href="Apis.css">
+    <script src="https://kit.fontawesome.com/9a9b8af8bd.js" crossorigin="anonymous"></script>
+</head>
+<body>
+    <nav>
+        <div class="nav-left">
+            <a href="/Home/" class="movement-button">Home</a>
+            <a href="/Calendar/Calendar.html" class="movement-button">Calendar</a>
+            <a href="/Notes/Notes.html" class="movement-button">Notes</a>
+            <a href="/Apis/" class="movement-button">Apis</a>
+        </div>
+        <div class="nav-left">
+            <a href="/Settings/Settings.html" class="movement-button"><i class="fa-solid fa-gear"></i></a>
+            <button id="logout-btn" class="movement-button"><i class="fa-solid fa-right-from-bracket"></i> Logout</button>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="api-card">
+            <h1>Add Personal API</h1>
+            <p class="subtitle">Enter the details of the API you want to add. This will be appended to your configuration.</p>
+            
+            <div id="message-box" class="hidden"></div>
+
+            <form id="api-form">
+                <div class="form-group">
+                    <label for="api-text">API Configuration String</label>
+                    <textarea id="api-text" placeholder="e.g. key=12345, url=https://api.example.com" required></textarea>
+                </div>
+                <button type="submit" id="done-btn" class="action-button">Done</button>
+            </form>
+        </div>
+    </div>
+
+    <script src="../api.js"></script>
+    <script src="Apis.js"></script>
+</body>
+</html>

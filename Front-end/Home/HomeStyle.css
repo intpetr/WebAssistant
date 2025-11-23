@@ -434,6 +434,48 @@ button.movement-button {
         text-decoration: underline;
 }
 
+/* --- NEW: Dynamic Actions Section Styles --- */
+.card-actions-section {
+    margin-top: 10px;
+}
+
+.loading-actions {
+    font-size: 0.85em;
+    color: #777;
+    font-style: italic;
+    text-align: center;
+    margin: 10px 0;
+}
+
+/* General style for the action buttons */
+.action-button {
+    border: none;
+    border-radius: 20px; /* Rounded pill shape */
+    cursor: pointer;
+    font-family: "Inter", sans-serif;
+    font-weight: 600;
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+/* Secondary button style used for these dynamic actions */
+.secondary-button {
+    background-color: var(--white);
+    color: var(--dark-green);
+    border: 2px solid var(--dark-green);
+}
+
+.secondary-button:hover {
+    background-color: var(--dark-green);
+    color: var(--white);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 6px rgba(0,0,0,0.15);
+}
+
+.secondary-button:active {
+    transform: translateY(0);
+}
+
 
 /* Responsive layout for smaller screens */
 @media (max-width: 900px) {

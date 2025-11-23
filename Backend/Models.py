@@ -41,6 +41,14 @@ class User(db.Model, UserMixin):
         cascade='all, delete-orphan'
     )
 
+    # Relationship for Personal APIs
+    personal_apis = db.relationship(
+        'PersonalApi',
+        back_populates='user',
+        lazy='dynamic',
+        cascade='all, delete-orphan'
+    )
+
     @staticmethod
     def get_by_username(username):
         return User.query.filter_by(username=username).first()
@@ -194,3 +202,20 @@ class AIRecommendation(db.Model):
 
     def __repr__(self):
         return f'<AIRecommendation {self.id}: {self.text[:30]}>'
+
+
+class PersonalApi(db.Model):
+    __tablename__ = 'personal_apis'
+
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(
+        db.Integer,
+        db.ForeignKey('users.id', ondelete='CASCADE'),
+        nullable=False
+    )
+    apistring = db.Column(db.Text, nullable=False)
+
+    user = db.relationship('User', back_populates='personal_apis')
+
+    def __repr__(self):
+        return f'<PersonalApi {self.id}: User {self.user_id}>'

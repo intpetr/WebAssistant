@@ -1,0 +1,172 @@
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap");
+
+/* Match colors from SettingsStyle.css */
+:root {
+    --dark-green: hsl(170, 100%, 15%);
+    --light-green: hsl(170, 100%, 25%);
+    --white: hsl(177, 41%, 91%);
+    --black: hsl(0, 0%, 20%);
+    --error-red: hsl(0, 80%, 55%);
+    --success-green: hsl(120, 60%, 40%);
+}
+
+body {
+    font-family: "Inter", sans-serif;
+    background-color: var(--dark-green);
+    margin: 0;
+    min-height: 100vh;
+    /* Use flex column to handle nav + centered content */
+    display: flex;
+    flex-direction: column;
+}
+
+nav {
+    background-color: var(--dark-green);
+    border-bottom: 5px solid var(--black);
+    padding: 0 10px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-shrink: 0;
+}
+
+.movement-button {
+    text-decoration: none;
+    border: 5px solid var(--white);
+    background-color: var(--white);
+    border-radius: 15px;
+    color: var(--dark-green);
+    display: inline-block;
+    padding: 10px;
+    margin: 10px 5px;
+    font-weight: 600;
+    font-size: 1rem;
+    cursor: pointer;
+}
+
+.container {
+    display: flex;
+    justify-content: center;
+    align-items: center; /* Center vertically */
+    padding-top: 20px;
+    padding-bottom: 20px;
+    flex-grow: 1; /* Take up remaining space */
+}
+
+/* Match card style from SettingsStyle.css */
+.api-card {
+    background-color: var(--white);
+    padding: 3rem 3rem; /* Matched padding */
+    border-radius: 15px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 25); /* Matched shadow */
+    width: 100%;
+    max-width: 400px; /* Matched width */
+    height: auto;
+    text-align: center;
+    transition: all 0.3s ease;
+}
+
+/* Match Title style */
+h1 {
+    color: var(--light-green); /* Matched color */
+    font-size: 2rem;
+    font-weight: bolder;
+    text-align: center;
+    margin-bottom: 0.5rem;
+    margin-top: 0;
+}
+
+/* Match Subtitle style */
+.subtitle {
+    font-size: 1.1rem;
+    font-weight: bold;
+    text-align: center;
+    margin-bottom: 2rem;
+    color: var(--black); /* Default text color in Settings is generally black/dark */
+}
+
+.form-group {
+    margin-bottom: 1.5rem;
+    text-align: left;
+}
+
+label {
+    display: block;
+    font-weight: bold;
+    margin-bottom: 0.5rem;
+    color: var(--dark-green);
+    font-size: 1rem;
+}
+
+textarea {
+    width: 100%;
+    min-height: 100px;
+    padding: 0.75rem 1rem; /* Matched input padding */
+    border: 2px solid rgba(0, 0, 0, 0.1); /* Similar to generic input style */
+    border-radius: 10px;
+    font-family: inherit;
+    font-size: 1rem;
+    box-sizing: border-box;
+    resize: vertical;
+    outline: none;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+textarea:focus {
+    border-color: var(--light-green);
+    /* Add focus ring if desired, similar to typical inputs */
+}
+
+/* Match Save Button style */
+.action-button {
+    width: 100%;
+    height: auto;
+    padding: 0.75rem;
+    border: none;
+    border-radius: 10px;
+    font-size: 1rem;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: var(--dark-green);
+    color: var(--white);
+    cursor: pointer;
+    transition: background-color 0.3 ease, box-shadow 0.2s ease;
+}
+
+.action-button:hover:not(:disabled) {
+    background-color: hsl(170, 100%, 35%);
+}
+
+.action-button:disabled {
+    background-color: var(--dark-green);
+    cursor: not-allowed;
+    opacity: 0.7;
+}
+
+/* Match Message Box style */
+#message-box {
+    padding: 15px;
+    border-radius: 10px;
+    margin-bottom: 25px;
+    font-size: 0.875rem;
+    font-weight: bolder;
+    text-align: left;
+    display: none;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.hidden { display: none !important; }
+
+.message-error {
+    background-color: hsl(0, 80%, 90%);
+    color: var(--error-red);
+    border: 1px solid var(--error-red);
+}
+
+.message-success {
+    background-color: hsl(120, 60%, 90%);
+    color: var(--success-green);
+    border: 1px solid var(--success-green);
+}
