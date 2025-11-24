@@ -1,0 +1,34 @@
+A dashboard jobb oldalán lévő recommendations című részen 2-3 rendszeresen frissülő személyre szabott program ajánlást olvashatnak a felhasználók.
+
+Hogyan jönnek létre?
+Egy ai modell hozzáfér a felhasználó naptárában lévő minden információkhoz: Események címe, részletes leírása, hónap, nap, pontos kezdés és befejezés időpontja. 
+
+Ezek alapján a felhasználó perferenciáit és szokásait figyelembe véve a modell 2-3 olyan pogramot / időtöltés ötletet ajánl a felhasználónak amivel szívesen töltené az idejét.
+
+
+
+Dinamikus gombok a kártyákon:
+
+Célja: a kártyák hasznosabbá, személyre szabottabbá tétele AI segítségével.
+
+Minden alkalommal amikor a a felhasználó frissiti az oldalt, a dashboard közepen levo kartyakon alul 1-3 gomb jelenik meg.
+
+A kártyák tartalma alapján az ai felajánl lehetőségeket. A három közül 1 mindig egy egyszerű átirányitás egy másik oldalra ahol többet tudhatun meg az adott kárty tartalmáról, pl magyarázat, teljes előrejelzés, magarázó cikk, stb.
+
+A másik 2 gomb pedig egy-egy api hívás. Ezeket az api hívásokat az ai ajánlja figyelembe véve hogy a kártya tartalam alapján mi lehet éppen hasznos a felhasználónak. 
+
+(Pl: hideg van -> Fűtés beindítása gomb,
+ Reggel van -> kávéfőző elindítása gomb.
+ Érdekes hír -> küldés a barátkonak gomb, 
+ A hőmérséklet kesesebb mint egy megdott érték -> autó motorjának indítása gomb)
+
+
+Milyen api-k vannak támogatva?
+
+Bármilyen eszköz, múködik a weboldallal aminek van api-ja és van a felhasználónak érvényes kulcsa hozzá. 
+
+Hogyan adhatok hozzá egy új eszközt?
+
+Az Apis menüpontban a szövegdobozba be kell illeszteni a kész api hívást és minden hozzá szükséges információt:: json, ip cím vagy domain, header tartalma stb. + Opcionálisan egy kirtériumot az ai-nak ami alapján majd ajánlani fogja nekünk az api hívást végrehatjását. Pl Ha reggel a hőmérséklet kisebb mint 0 celsius fok és esik a hó, indítsa be a kocsim motorját ezzel az api hívással.  (prompt engineering)
+
+Ha nem adunk meg ilyen kritériumot az ai magától fogja ajánlani az átala megfelelőnek ítélt kártya alatt, és megfelőnek ítélt időpontban

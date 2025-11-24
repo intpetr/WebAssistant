@@ -61,6 +61,76 @@ A cél egy reklámmentes, felhasználóbarát, reszponzív és biztonságos rend
 
 ---
 
+
+## Telepítés és Beállítás
+
+### 1. Előfeltételek
+
+Győződj meg róla, hogy a Python 3.10+ és a PostgreSQL telepítve van.
+
+Szükséges továbbá az Ollama telepítése és helyi futtatása az MI funkciókhoz (Phi3 modell).
+
+### 2. A Repository Klónozása
+
+Töltsd le a forráskódot a helyi gépedre.
+
+```
+git clone <your-repo-url>
+cd WebAssistant
+
+```
+
+### 3. Függőségek Telepítése
+
+Navigálj a backend mappába, és telepítsd a szükséges Python csomagokat.
+
+```
+cd Backend
+pip install flask flask-sqlalchemy flask-login flask-cors psycopg2-binary requests google-genai ollama torch numpy pandas joblib scikit-learn schedule
+
+```
+
+### 4. Adatbázis Konfigurálása
+
+Hozz létre egy `credentials.txt` nevű fájlt a `Backend/` mappában. Illeszd be a PostgreSQL kapcsolati stringedet (csak egy sor legyen):
+
+```
+postgresql://felhasznalonev:jelszo@localhost:5432/adatbazisneve
+
+```
+
+### 5. MI Modellek Beállítása
+
+Töltsd le a szükséges modellt a helyi MI asszisztenshez.
+
+```
+ollama pull phi3:mini
+
+```
+
+_(Megjegyzés: Az alkalmazás a Google Geminit is használja; győződj meg róla, hogy beállítottál egy érvényes API kulcsot a `main.py` fájlban vagy a környezeti változókban, ha szükséges.)_
+
+### 6. Az Alkalmazás Futtatása
+
+Indítsd el a Flask backend szervert.
+
+```
+python main.py
+
+```
+
+A konzolon a `Database initialized successfully` üzenetet kell látnod.
+
+### 7. A Dashboard Elérése
+
+Nyisd meg a webböngésződet, és navigálj ide:
+
+http://localhost:5000
+
+
+
+
+
 ## Licence
 
 MIT / Apache 2.0 / CC BY-NC-SA 4.0
